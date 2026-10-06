@@ -35,4 +35,24 @@ Rule accuracy, checked against real apps before release:
   `setState` in `catch`/`finally` after an awaited `try`, and ignores
   awaits in branches that always return.
 - `avoid_logging_sensitive_data` now checks `debugPrint` (previously
-  missed: it's a function-typed variable, not a function).
+  missed: it's a function-typed variable, not a function), and only flags
+  logged *String* values with a secret-like name -- not `$authError`,
+  `$isPasswordValid`, or `${token.length}`.
+- `hardcoded_secret` also catches secrets without a provider-specific
+  shape: a random-looking literal assigned to a secret-named variable or
+  named argument (`clientSecret`, `apiKey`, `accessToken`, ...).
+  Placeholders, key names, labels, and URLs are not flagged.
+- `insecure_http_url` treats private LAN addresses and `.local` hosts as
+  dev hosts, ignores a bare `'http://'` prefix check, and no longer treats
+  `http://localhost.evil.com` as local.
+- `missing_list_key` only flags items that hold state (`TextField`, form
+  fields, `ExpansionTile`, app-defined `StatefulWidget`s); now a
+  correctness rule.
+- `unnecessary_column_or_row` skips single-child flexes that set
+  alignment or sizing, wrap `Flexible`/`Expanded`/`Spacer`, or use
+  `if`/`for`/spread elements.
+- `widget_returning_method` only flags instance members of widget and
+  `State` classes; it and `deeply_nested_widget_tree` now point at the
+  method name instead of its doc comment or `@override`.
+- `avoid_print`, `shrinkwrap_listview`, and `setstate_in_list_builder`
+  default to info (advisory; raise them in `fluttr_scope.yaml`).

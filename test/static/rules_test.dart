@@ -228,6 +228,33 @@ void main() {
     labelledFixtureTests('mounted_check_examples.dart', ['missing_mounted_check']);
   });
 
+  group('avoid_logging_sensitive_data on real-world shapes (logging_real_world_examples.dart)',
+      () {
+    labelledFixtureTests('logging_real_world_examples.dart', ['avoid_logging_sensitive_data']);
+  });
+
+  group('insecure_http_url on real-world shapes (http_url_real_world_examples.dart)', () {
+    labelledFixtureTests('http_url_real_world_examples.dart', ['insecure_http_url']);
+  });
+
+  group('missing_list_key on real-world shapes (list_key_real_world_examples.dart)', () {
+    labelledFixtureTests('list_key_real_world_examples.dart', ['missing_list_key']);
+  });
+
+  group('unnecessary_column_or_row on real-world shapes (column_row_real_world_examples.dart)',
+      () {
+    labelledFixtureTests('column_row_real_world_examples.dart', ['unnecessary_column_or_row']);
+  });
+
+  group('widget_returning_method on real-world shapes (widget_method_real_world_examples.dart)',
+      () {
+    labelledFixtureTests('widget_method_real_world_examples.dart', ['widget_returning_method']);
+  });
+
+  group('hardcoded_secret on real-world shapes (secret_real_world_examples.dart)', () {
+    labelledFixtureTests('secret_real_world_examples.dart', ['hardcoded_secret']);
+  });
+
   test('positioned_outside_stack flags Positioned outside a Stack', () {
     final matches = inFile('positioned_outside_stack', 'hierarchy_examples.dart');
     expect(matches, hasLength(1));
@@ -457,12 +484,12 @@ void main() {
     );
   });
 
-  test('missing_list_key flags a widget generated via .map().toList() without a key', () {
+  test('missing_list_key flags a stateful item generated via .map().toList() without a key', () {
     final matches = inFile('missing_list_key', 'missing_list_key_example.dart');
     expect(matches, hasLength(1));
 
     final (line, column) = locate(
-      'Text(item)',
+      'TextField(',
       relativeFile: 'missing_list_key_example.dart',
     );
     expect(matches.single.location.line, line);
@@ -512,6 +539,7 @@ void main() {
     final (line, column) = locate(
       "Widget _buildHelper() => const Text('helper');",
       relativeFile: 'simplification_examples.dart',
+      columnOf: '_buildHelper',
     );
     expect(matches.single.location.line, line);
     expect(matches.single.location.column, column);
@@ -621,6 +649,11 @@ void main() {
       relativeFile: 'misc_examples.dart',
     ).$1;
     expect(matches.single.location.line, greaterThan(classLine));
+
+    // Points at the method name, not its `@override` annotation.
+    final flaggedLine = File(p.join(sampleAppRoot, 'lib', 'misc_examples.dart'))
+        .readAsLinesSync()[matches.single.location.line - 1];
+    expect(flaggedLine.substring(matches.single.location.column - 1), startsWith('build('));
   });
 
   test('todo_comment flags an unresolved TODO comment', () {

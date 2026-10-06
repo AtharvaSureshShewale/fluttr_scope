@@ -20,7 +20,7 @@ class AvoidPrintRule extends StaticRule {
       findings.add(Finding(
         ruleId: id,
         category: Category.style,
-        severity: Severity.warning,
+        severity: Severity.info,
         message: 'Avoid `print` calls; use a logger instead.',
         location: locationOf(unit, node, context),
       ));

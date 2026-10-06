@@ -8,7 +8,7 @@ class MissingListKeyExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: _items.map((item) => Text(item)).toList(),
+      children: _items.map((item) => TextField(decoration: InputDecoration(hintText: item))).toList(),
     );
   }
 }

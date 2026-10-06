@@ -25,7 +25,7 @@ class ShrinkwrapListviewRule extends StaticRule {
       findings.add(Finding(
         ruleId: id,
         category: Category.performance,
-        severity: Severity.warning,
+        severity: Severity.info,
         message: '`shrinkWrap: true` forces this list to lay out all of '
             'its children eagerly instead of lazily. Fine for a short, '
             'fixed-size list; a performance smell for anything larger.',

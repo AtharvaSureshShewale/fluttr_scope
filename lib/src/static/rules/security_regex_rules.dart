@@ -8,8 +8,17 @@ import '../../model/severity.dart';
 import '../flutter_ast.dart';
 import '../rule.dart';
 
-final _localHosts = RegExp(r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|10\.0\.2\.2)');
-final _httpUrl = RegExp(r'^http://');
+/// Dev-only hosts: loopback, the Android emulator's host alias, private
+/// LAN ranges (a phone on Wi-Fi reaching a laptop's dev server), and mDNS
+/// `.local` names. Cleartext to these doesn't cross the internet.
+final _localHosts = RegExp(
+  r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|10\.\d+\.\d+\.\d+'
+  r'|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|\[::1\]|[\w.-]+\.local)([:/?#]|$)',
+);
+
+/// A URL with an actual host -- not the bare scheme `'http://'`, which is
+/// usually a prefix check (`url.startsWith('http://')`), not a request.
+final _httpUrl = RegExp(r'^http://[\w\[]');
 
 /// Flags a hardcoded `http://` URL (cleartext, not `https://`) that isn't
 /// pointed at a local dev host. Traffic over it can be intercepted or

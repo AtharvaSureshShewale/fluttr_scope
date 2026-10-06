@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:path/path.dart' as p;
 
 import '../model/finding.dart';
@@ -39,6 +40,23 @@ SourceLocation locationOf(
     line: start.lineNumber,
     column: start.columnNumber,
     length: node.length,
+  );
+}
+
+/// Builds the [SourceLocation] of [token] within [unit] -- for pointing a
+/// finding at a declaration's *name* rather than its first token, which
+/// for a method is its doc comment or `@override` annotation.
+SourceLocation locationOfToken(
+  ResolvedUnitResult unit,
+  Token token,
+  RuleContext context,
+) {
+  final start = unit.lineInfo.getLocation(token.offset);
+  return SourceLocation(
+    file: relativePath(unit, context),
+    line: start.lineNumber,
+    column: start.columnNumber,
+    length: token.length,
   );
 }
 

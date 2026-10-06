@@ -189,11 +189,10 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 | `future_created_in_build` | warning | `FutureBuilder.future` / `StreamBuilder.stream` created inline in `build()`, so it re-fires every rebuild |
 | `key_created_in_build` | warning | `GlobalKey` / `UniqueKey` constructed in `build()` |
 | `dispose_missing` | warning | A controller / subscription field on a `State` that `dispose()` never releases |
-| `missing_list_key` | warning | `.map(...).toList()` children with no `key:` |
-| **`setstate_in_list_builder`** | warning | `setState` inside an `itemBuilder`, which rebuilds the whole list on every tap |
-| `shrinkwrap_listview` | warning | `shrinkWrap: true` on a scrollable |
+| **`setstate_in_list_builder`** | info | `setState` inside an `itemBuilder`, which rebuilds the whole list on every tap |
+| `shrinkwrap_listview` | info | `shrinkWrap: true` on a scrollable |
 | `empty_container_instead_of_sizedbox` | info | An empty `Container()` used for spacing |
-| **`widget_returning_method`** | info | A method returning `Widget` instead of a widget class |
+| **`widget_returning_method`** | info | A method on a widget / `State` returning `Widget` instead of a widget class |
 
 ### Correctness
 | Rule | Default | Flags |
@@ -212,6 +211,7 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 | `missing_mounted_check` | warning | `setState` after `await` with no `mounted` check |
 | `nested_scaffold` | warning | A `Scaffold` inside another `Scaffold` |
 | `build_context_stored_in_field` | warning | A `BuildContext` assigned to a field |
+| `missing_list_key` | warning | `.map(...).toList()` items that hold state (`TextField`, `ExpansionTile`, your own `StatefulWidget`s) with no `key:` |
 | `future_builder_missing_error_check` | warning | `FutureBuilder` that never checks `snapshot.hasError` |
 | `stream_builder_missing_error_check` | warning | `StreamBuilder` that never checks `snapshot.hasError` |
 | `image_network_without_error_builder` | info | `Image.network` with no `errorBuilder` |
@@ -220,16 +220,16 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 ### Security
 | Rule | Default | Flags |
 |---|---|---|
-| `hardcoded_secret` | error | AWS / Google / Stripe / GitHub / Slack key shapes in string literals |
+| `hardcoded_secret` | error | AWS / Google / Stripe / GitHub / Slack key shapes, or a random-looking literal assigned to a secret-named variable or argument (`clientSecret`, `apiKey`, `accessToken`, ...) |
 | `sql_injection_risk` | error | Raw SQL built by interpolation or `+` |
 | `insecure_certificate_validation` | error | `badCertificateCallback` that always returns `true` |
 | `dependency_vulnerability` | error | A known CVE in a locked dependency version (OSV.dev) |
-| `insecure_http_url` | warning | A cleartext `http://` URL to a non-local host |
+| `insecure_http_url` | warning | A cleartext `http://` URL to a non-local host (loopback, LAN and `.local` dev hosts are fine) |
 | `sensitive_query_param` | warning | A token / password / key passed in a URL query |
 | `insecure_random_for_secret` | warning | `Random()` (not `Random.secure()`) for a secret-named value |
 | `unrestricted_webview_javascript` | warning | `JavaScriptMode.unrestricted` |
 | `textfield_password_not_obscured` | warning | A password field without `obscureText: true` |
-| `avoid_logging_sensitive_data` | warning | `print` / `debugPrint` of a secret-named value |
+| `avoid_logging_sensitive_data` | warning | `print` / `debugPrint` of a secret-named String value |
 | `insecure_storage_of_sensitive_data` | warning | A secret-named key in `SharedPreferences` |
 | `sql_table_missing_constraints` | warning | `CREATE TABLE` with no constraints at all |
 | `android_cleartext_traffic_enabled` | warning | `usesCleartextTraffic="true"` in `AndroidManifest.xml` |
@@ -246,10 +246,10 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 ### Style
 | Rule | Default | Flags |
 |---|---|---|
-| `avoid_print` | warning | Bare `print(...)` |
+| `avoid_print` | info | Bare `print(...)` |
 | `deeply_nested_widget_tree` | info | A `build()` tree nested too deep |
 | `todo_comment` | info | `TODO` / `FIXME` comments |
-| `unnecessary_column_or_row` | info | `Column` / `Row` with a single child |
+| `unnecessary_column_or_row` | info | `Column` / `Row` with a single plain child and no alignment or sizing |
 | `empty_flex_children` | info | `Column` / `Row` with no children |
 
 Rules favour precision over recall: when a rule can't be sure, it stays

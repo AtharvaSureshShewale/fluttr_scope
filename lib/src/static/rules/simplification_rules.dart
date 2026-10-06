@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../../model/category.dart';
 import '../../model/finding.dart';
@@ -35,8 +36,15 @@ class EmptyContainerInsteadOfSizedboxRule extends StaticRule {
   }
 }
 
-/// Flags `Column`/`Row` wrapping a single child — the wrapper serves no
-/// layout purpose and can be replaced with the child directly.
+/// Flags a `Column`/`Row` with exactly one plain child and nothing else
+/// configured — usually leftover structure that `Align` (or the child
+/// itself) expresses more directly and cheaply.
+///
+/// A single-child flex can still do real layout work, so these are left
+/// alone: any argument besides `key`/`children` (alignment, sizing,
+/// direction), a `Flexible`/`Expanded`/`Spacer` child (bounded by the
+/// flex), and `if`/`for`/spread elements (which may produce zero or many
+/// children).
 class UnnecessaryColumnOrRowRule extends StaticRule {
   @override
   String get id => 'unnecessary_column_or_row';
@@ -45,20 +53,39 @@ class UnnecessaryColumnOrRowRule extends StaticRule {
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_ChildrenCountVisitor({'Column', 'Row'}, (node, count) {
-      if (count == 1) {
+      if (count == 1 && _isPlainSingleChild(node)) {
         findings.add(Finding(
           ruleId: id,
           category: Category.style,
           severity: Severity.info,
-          message: '`${creationTypeName(node)}` wraps a '
-              'single child for no layout purpose — use the child '
-              'directly.',
+          message: '`${creationTypeName(node)}` has a single child and no '
+              'alignment or sizing set. If it only positions the child, '
+              '`Align` (or the child directly) is simpler.',
           location: locationOf(unit, node, context),
         ));
       }
     }));
     return findings;
   }
+}
+
+const _flexChildTypes = {'Flexible', 'Expanded', 'Spacer'};
+
+bool _isPlainSingleChild(InstanceCreationExpression flex) {
+  Expression? child;
+  for (final arg in flex.argumentList.arguments) {
+    if (arg is! NamedExpression) return false;
+    final name = arg.name.label.name;
+    if (name == 'key') continue;
+    if (name != 'children') return false;
+    final element = (arg.expression as ListLiteral).elements.single;
+    if (element is! Expression) return false; // if / for / spread
+    child = element;
+  }
+  final type = child?.staticType;
+  if (type is! InterfaceType) return true;
+  final names = {type.element3.name3, for (final t in type.allSupertypes) t.element3.name3};
+  return !names.any(_flexChildTypes.contains);
 }
 
 /// Flags `Column`/`Row` with an empty `children:` list — most likely
@@ -86,10 +113,13 @@ class EmptyFlexChildrenRule extends StaticRule {
   }
 }
 
-/// Flags a method or getter that returns `Widget` but isn't the `build`
-/// override. Unlike a real widget class, it doesn't get its own
-/// `Element`, so Flutter can't skip rebuilding it independently of its
-/// caller — a common source of larger-than-necessary rebuild scopes.
+/// Flags an instance method or getter on a widget or `State` class that
+/// returns `Widget` but isn't the `build` override. Unlike a real widget
+/// class, it doesn't get its own `Element`, so Flutter can't skip
+/// rebuilding it independently of its caller — a common source of
+/// larger-than-necessary rebuild scopes. Static helpers and methods on
+/// non-widget classes (factories, utility classes) aren't part of any
+/// widget's rebuild, so they're out of scope.
 class WidgetReturningMethodRule extends StaticRule {
   @override
   String get id => 'widget_returning_method';
@@ -105,7 +135,7 @@ class WidgetReturningMethodRule extends StaticRule {
         message: 'A method/getter returning `Widget` doesn\'t get its own '
             '`Element`, so Flutter can\'t skip rebuilding it '
             'independently — extract it to its own widget class instead.',
-        location: locationOf(unit, node, context),
+        location: locationOfToken(unit, node.name, context),
       ));
     }));
     return findings;
@@ -160,7 +190,12 @@ class _WidgetMethodVisitor extends RecursiveAstVisitor<void> {
     // the `?` and never match — same class of bug as creationTypeName.
     final returnType = node.returnType;
     final returnTypeName = returnType is NamedType ? returnType.name2.lexeme : null;
-    if (node.name.lexeme != 'build' && returnTypeName == 'Widget') {
+    final enclosing = node.parent;
+    if (node.name.lexeme != 'build' &&
+        returnTypeName == 'Widget' &&
+        !node.isStatic &&
+        enclosing is ClassDeclaration &&
+        (extendsClassNamed(enclosing, 'Widget') || extendsClassNamed(enclosing, 'State'))) {
       onMatch(node);
     }
     super.visitMethodDeclaration(node);

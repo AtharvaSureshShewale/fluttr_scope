@@ -38,7 +38,7 @@ class SetstateInListBuilderRule extends StaticRule {
       findings.add(Finding(
         ruleId: id,
         category: Category.performance,
-        severity: Severity.warning,
+        severity: Severity.info,
         message: '`setState()` inside a list/grid `itemBuilder` rebuilds '
             'the entire list, not just this item -- every visible item\'s '
             'builder re-runs on a single tap. If only this item\'s own '
