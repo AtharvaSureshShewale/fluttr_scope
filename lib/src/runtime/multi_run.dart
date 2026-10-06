@@ -1,4 +1,5 @@
 import 'environment_metadata.dart';
+import 'executed_lines.dart';
 import 'frame_budget.dart';
 import 'run_timeline.dart';
 import 'runtime_driver.dart';
@@ -124,6 +125,11 @@ class MultiRunSummary {
   /// for the same reason [RunAnalysis]'s new fields are optional.
   final EnvironmentMetadata? environment;
 
+  /// Which of the app's lines ran, merged across every run that completed
+  /// -- including runs invalid only for having too few frames (a line that
+  /// ran in any run ran). `null` if no run captured coverage.
+  final ExecutedLines? executedLines;
+
   const MultiRunSummary({
     required this.requestedRuns,
     required this.warmup,
@@ -136,6 +142,7 @@ class MultiRunSummary {
     required this.startupWorstFrameMs,
     required this.dominantBottleneck,
     this.environment,
+    this.executedLines,
   });
 
   Map<String, Object?> toJson() => {
@@ -192,6 +199,7 @@ Future<MultiRunSummary> measureMultipleRuns({
   final validRuns = <RunAnalysis>[];
   final invalidRuns = <InvalidRun>[];
   String? dartVmVersion;
+  ExecutedLines? executedLines;
 
   for (var i = 1; i <= runs; i++) {
     onRunStart?.call(i, runs);
@@ -204,6 +212,11 @@ Future<MultiRunSummary> measureMultipleRuns({
         onLaunchOutput: onLaunchOutput,
       );
       dartVmVersion ??= result.dartVmVersion;
+      // Which lines ran doesn't depend on how many frames rendered, so a
+      // run too idle for frame statistics still contributes coverage.
+      if (result.executedLines case final lines?) {
+        executedLines = executedLines?.merge(lines) ?? lines;
+      }
       final capture = splitByWarmup(result.frames, warmup);
       if (capture.steadyState.length < minSteadyStateFramesPerRun) {
         invalidRuns.add(InvalidRun(
@@ -248,6 +261,7 @@ Future<MultiRunSummary> measureMultipleRuns({
     validRuns: validRuns,
     invalidRuns: invalidRuns,
     environment: detectEnvironment(device: device, dartVmVersion: dartVmVersion),
+    executedLines: executedLines,
   );
 }
 
@@ -262,6 +276,7 @@ MultiRunSummary summarizeRuns({
   required List<RunAnalysis> validRuns,
   required List<InvalidRun> invalidRuns,
   EnvironmentMetadata? environment,
+  ExecutedLines? executedLines,
 }) {
   if (validRuns.isEmpty) {
     return MultiRunSummary(
@@ -271,6 +286,7 @@ MultiRunSummary summarizeRuns({
       validRuns: validRuns,
       invalidRuns: invalidRuns,
       environment: environment,
+      executedLines: executedLines,
       overBudgetPercent: null,
       jankClusterCount: null,
       slowestSteadyStateFrameMs: null,
@@ -291,6 +307,7 @@ MultiRunSummary summarizeRuns({
     validRuns: validRuns,
     invalidRuns: invalidRuns,
     environment: environment,
+    executedLines: executedLines,
     overBudgetPercent: computeStats([for (final r in validRuns) r.steadyState.overBudgetPercent]),
     jankClusterCount:
         computeStats([for (final r in validRuns) r.steadyState.jankClusters.length.toDouble()]),

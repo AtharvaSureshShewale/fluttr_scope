@@ -543,6 +543,13 @@ void main() {
     );
     expect(matches.single.location.line, line);
     expect(matches.single.location.column, column);
+
+    // The span runs to the end of the method, so runtime coverage (which
+    // never reports a declaration line) can check the body's lines.
+    expect(
+      matches.single.location.length,
+      "_buildHelper() => const Text('helper');".length,
+    );
   });
 
   test('opacity_out_of_range flags Opacity.opacity outside [0.0, 1.0]', () {

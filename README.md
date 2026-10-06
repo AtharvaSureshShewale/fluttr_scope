@@ -68,6 +68,30 @@ Runs only the security rules, plus `AndroidManifest.xml` / `Info.plist`
 checks and the dependency CVE audit, and gives a plain verdict:
 **SECURE**, **NEEDS ATTENTION**, or **NOT SECURE**. Exits 1 only on NOT SECURE.
 
+### `prioritize`: what to fix first (experimental)
+
+```sh
+fluttr_scope prioritize [project_dir] --device emulator-5554 --runs 3 --seconds 15
+```
+
+A large app can have thousands of findings, and nobody fixes thousands of
+findings. `prioritize` runs every static check, launches the app, and
+records which of your lines actually ran (the Dart VM's own coverage) plus
+widget rebuilds and frame timing. Then it ranks every finding:
+
+| | Meaning |
+|---|---|
+| 🔥 | The widget rebuilt during slow frames: fix first |
+| ▶ | The code ran during the session |
+| ○ | Never ran in this session (or the file was never loaded) |
+| — | No runtime signal: manifests, `pubspec.lock`, constants, tests |
+
+Use the app while it's measured, so the screens you care about actually
+run. Runtime evidence only ranks findings: errors and warnings are always
+listed, even when the code never ran. Info findings are shown only when
+they ran during slow frames, unless you pass `--all`. `--format json` gives
+every finding with its evidence.
+
 ### `measure`: runtime evidence (experimental)
 
 ```sh

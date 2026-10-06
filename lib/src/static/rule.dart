@@ -46,17 +46,22 @@ SourceLocation locationOf(
 /// Builds the [SourceLocation] of [token] within [unit] -- for pointing a
 /// finding at a declaration's *name* rather than its first token, which
 /// for a method is its doc comment or `@override` annotation.
+///
+/// [end] extends the span past the token (e.g. to the end of the method
+/// body), so tools that ask "did this code run?" check the body's lines --
+/// the VM's coverage never reports a declaration line itself.
 SourceLocation locationOfToken(
   ResolvedUnitResult unit,
   Token token,
-  RuleContext context,
-) {
+  RuleContext context, {
+  int? end,
+}) {
   final start = unit.lineInfo.getLocation(token.offset);
   return SourceLocation(
     file: relativePath(unit, context),
     line: start.lineNumber,
     column: start.columnNumber,
-    length: token.length,
+    length: (end ?? token.end) - token.offset,
   );
 }
 

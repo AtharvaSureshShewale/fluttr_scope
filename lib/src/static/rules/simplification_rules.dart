@@ -135,7 +135,7 @@ class WidgetReturningMethodRule extends StaticRule {
         message: 'A method/getter returning `Widget` doesn\'t get its own '
             '`Element`, so Flutter can\'t skip rebuilding it '
             'independently — extract it to its own widget class instead.',
-        location: locationOfToken(unit, node.name, context),
+        location: locationOfToken(unit, node.name, context, end: node.end),
       ));
     }));
     return findings;

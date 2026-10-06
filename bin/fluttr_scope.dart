@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 import 'package:fluttr_scope/src/cli/analyze_command.dart';
 import 'package:fluttr_scope/src/cli/correlate_command.dart';
 import 'package:fluttr_scope/src/cli/measure_command.dart';
+import 'package:fluttr_scope/src/cli/prioritize_command.dart';
 import 'package:fluttr_scope/src/cli/security_command.dart';
 import 'package:fluttr_scope/src/config/project_config.dart';
 import 'package:fluttr_scope/src/version.dart';
@@ -17,7 +18,8 @@ Future<void> main(List<String> arguments) async {
     ..addCommand(AnalyzeCommand())
     ..addCommand(MeasureCommand())
     ..addCommand(CorrelateCommand())
-    ..addCommand(SecurityCommand());
+    ..addCommand(SecurityCommand())
+    ..addCommand(PrioritizeCommand());
   runner.argParser.addFlag('version', negatable: false, help: 'Print the version and exit.');
 
   int exitCode;

@@ -1,3 +1,4 @@
+import 'executed_lines.dart';
 import 'frame_metrics.dart';
 import 'frame_rebuild_accumulator.dart';
 import 'rebuild_record.dart';
@@ -52,6 +53,11 @@ class MeasurementResult {
   /// frame correlation possible. Empty for captures predating this field.
   final List<FrameRebuildRecord> perFrameRebuilds;
 
+  /// Which of the app's own lines ran during this capture. `null` for
+  /// captures predating this field, or when the app's package name
+  /// couldn't be read.
+  final ExecutedLines? executedLines;
+
   const MeasurementResult({
     required this.rebuilds,
     required this.heapUsage,
@@ -59,6 +65,7 @@ class MeasurementResult {
     this.launchedAt,
     this.dartVmVersion,
     this.perFrameRebuilds = const [],
+    this.executedLines,
   });
 
   Map<String, Object?> toJson() => {
@@ -68,6 +75,7 @@ class MeasurementResult {
         'launchedAt': launchedAt?.toIso8601String(),
         'dartVmVersion': dartVmVersion,
         'perFrameRebuilds': perFrameRebuilds.map((r) => r.toJson()).toList(),
+        if (executedLines != null) 'executedLines': executedLines!.toJson(),
       };
 
   factory MeasurementResult.fromJson(Map<String, Object?> json) => MeasurementResult(
@@ -88,5 +96,8 @@ class MeasurementResult {
           for (final entry in (json['perFrameRebuilds'] as List? ?? const []))
             FrameRebuildRecord.fromJson(entry as Map<String, Object?>),
         ],
+        executedLines: json['executedLines'] == null
+            ? null
+            : ExecutedLines.fromJson(json['executedLines'] as Map<String, Object?>),
       );
 }

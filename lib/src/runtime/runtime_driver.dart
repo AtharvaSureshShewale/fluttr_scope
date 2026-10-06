@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
+import 'executed_lines.dart';
 import 'frame_metrics.dart';
 import 'frame_rebuild_accumulator.dart';
 import 'measurement_result.dart';
@@ -138,6 +139,13 @@ class RuntimeDriver {
 
     final afterBytes = await _heapUsageBytes(service, isolateId);
 
+    // Collected last: forceCompile compiles every app function, which
+    // would otherwise land inside the measured window as jank.
+    final packageName = readPackageName(root);
+    final executedLines = packageName == null
+        ? null
+        : await collectExecutedLines(service, isolateId, packageName: packageName);
+
     return MeasurementResult(
       rebuilds: accumulator.records,
       heapUsage: HeapUsage(beforeBytes: beforeBytes, afterBytes: afterBytes),
@@ -145,6 +153,7 @@ class RuntimeDriver {
       launchedAt: launchedAt,
       dartVmVersion: vm.version,
       perFrameRebuilds: frameRebuildAccumulator.records,
+      executedLines: executedLines,
     );
   }
 

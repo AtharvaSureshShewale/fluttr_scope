@@ -12,6 +12,10 @@ First public release.
   joined to static performance findings.
 - `correlate`: attaches rebuild counts from a saved capture to static
   findings.
+- `prioritize` (experimental): ranks every static finding by runtime
+  evidence -- ran during slow frames, ran, never ran, no signal -- using
+  the VM's line coverage plus rebuild/frame timing. `measure` captures now
+  include which app lines ran (`executedLines` in JSON).
 - `fluttr_scope.yaml`: exclude paths, disable rules, override severities.
 - `// ignore: fluttr_scope/<rule>` and `// ignore_for_file:` comments.
 - Baselines (`--write-baseline`, `--baseline`) for adopting on existing

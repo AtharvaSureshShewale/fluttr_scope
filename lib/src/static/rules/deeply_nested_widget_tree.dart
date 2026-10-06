@@ -33,7 +33,7 @@ class DeeplyNestedWidgetTreeRule extends StaticRule {
           message: 'This `build()` nests widgets $maxDepth levels deep '
               '(over $_threshold). Consider extracting sub-trees into '
               'their own widgets for readability.',
-          location: locationOfToken(unit, buildMethod.name, context),
+          location: locationOfToken(unit, buildMethod.name, context, end: buildMethod.end),
         ));
       }
     }));
