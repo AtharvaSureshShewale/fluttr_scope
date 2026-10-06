@@ -9,13 +9,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # The Flutter SDK (not just Dart) is needed: the rule tests analyze
       # test/fixtures/sample_app, a Flutter app.
+      # Pinned to the SDK this package is developed and tested against
+      # (analyzer ^7 targets Dart 3.9). Newer SDKs need the analyzer
+      # upgrade first; bump this together with it.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.35.2
 
       - run: dart pub get
       - run: flutter pub get
