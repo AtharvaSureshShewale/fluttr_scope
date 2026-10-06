@@ -1,16 +1,24 @@
 import 'package:fluttr_scope/src/runtime/rebuild_stats_accumulator.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+
+// Absolute paths in the host OS's own form: the framework reports
+// locations as native absolute paths (or file:// URIs), so hardcoding
+// `C:\project` only works on Windows.
+final _root = p.join(p.rootPrefix(p.current), 'project');
+String _native(String relative) => p.joinAll([_root, ...relative.split('/')]);
+String _fileUri(String relative) => p.toUri(_native(relative)).toString();
 
 void main() {
   test('accumulates counts across multiple events for the same location', () {
-    final acc = RebuildStatsAccumulator(root: r'C:\project');
+    final acc = RebuildStatsAccumulator(root: _root);
 
     acc.addEvent({
       'startTime': 0,
       'frameNumber': 1,
       'events': [0, 3],
       'locations': {
-        r'C:\project\lib\main.dart': {
+        _native('lib/main.dart'): {
           'ids': [0],
           'lines': [42],
           'columns': [12],
@@ -37,11 +45,11 @@ void main() {
   });
 
   test('normalizes a file:// URI to a root-relative path', () {
-    final acc = RebuildStatsAccumulator(root: r'C:\project');
+    final acc = RebuildStatsAccumulator(root: _root);
     acc.addEvent({
       'events': [0, 1],
       'locations': {
-        'file:///C:/project/lib/widgets/foo.dart': {
+        _fileUri('lib/widgets/foo.dart'): {
           'ids': [0],
           'lines': [1],
           'columns': [1],
@@ -53,11 +61,11 @@ void main() {
   });
 
   test('tracks multiple distinct locations in the same file independently', () {
-    final acc = RebuildStatsAccumulator(root: r'C:\project');
+    final acc = RebuildStatsAccumulator(root: _root);
     acc.addEvent({
       'events': [0, 2, 1, 7],
       'locations': {
-        r'C:\project\lib\main.dart': {
+        _native('lib/main.dart'): {
           'ids': [0, 1],
           'lines': [10, 20],
           'columns': [5, 9],
@@ -70,7 +78,7 @@ void main() {
   });
 
   test('an empty event stream produces no records', () {
-    final acc = RebuildStatsAccumulator(root: r'C:\project');
+    final acc = RebuildStatsAccumulator(root: _root);
     expect(acc.records, isEmpty);
   });
 }

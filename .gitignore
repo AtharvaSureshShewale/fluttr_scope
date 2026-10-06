@@ -7,5 +7,7 @@ pubspec.lock
 test/fixtures/**/.dart_tool/
 test/fixtures/**/build/
 test/fixtures/**/pubspec.lock
+# Test data for the dependency audit, not a real lockfile.
+!test/fixtures/dependency_audit/pubspec.lock
 test/fixtures/**/.flutter-plugins
 test/fixtures/**/.flutter-plugins-dependencies
