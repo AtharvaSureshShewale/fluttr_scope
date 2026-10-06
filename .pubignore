@@ -1,0 +1,22 @@
+# A .pubignore replaces .gitignore for `dart pub publish` in this
+# directory, so everything in .gitignore is repeated here.
+.dart_tool/
+.packages
+build/
+pubspec.lock
+*.iml
+
+test/fixtures/**/.dart_tool/
+test/fixtures/**/build/
+test/fixtures/**/pubspec.lock
+test/fixtures/**/.flutter-plugins
+test/fixtures/**/.flutter-plugins-dependencies
+
+# Not part of the package.
+.github/
+.claude/
+lighthouse-for-flutter-blueprint_1.md
+fluttr_scope_baseline.json
+# A whole Flutter app used only by this repo's own rule tests; it imports
+# package:flutter, which pub rejects in a package that doesn't depend on it.
+test/fixtures/sample_app/

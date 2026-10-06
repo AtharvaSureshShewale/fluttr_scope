@@ -1,0 +1,11 @@
+.dart_tool/
+.packages
+build/
+pubspec.lock
+*.iml
+
+test/fixtures/**/.dart_tool/
+test/fixtures/**/build/
+test/fixtures/**/pubspec.lock
+test/fixtures/**/.flutter-plugins
+test/fixtures/**/.flutter-plugins-dependencies

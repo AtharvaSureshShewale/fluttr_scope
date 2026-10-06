@@ -1,0 +1,37 @@
+name: fluttr_scope
+description: >-
+  Flutter-aware static analysis (performance, correctness, security,
+  accessibility) with runtime rebuild and frame-timing evidence joined to
+  the exact source line.
+version: 0.1.0
+repository: https://github.com/AtharvaSureshShewale/fluttr_scope
+issue_tracker: https://github.com/AtharvaSureshShewale/fluttr_scope/issues
+topics:
+  - flutter
+  - lint
+  - static-analysis
+  - performance
+  - security
+
+environment:
+  sdk: ^3.9.0
+
+executables:
+  fluttr_scope:
+
+# Fake key shapes used to test the hardcoded_secret rule itself.
+false_secrets:
+  - /test/static/hardcoded_secret_pattern_test.dart
+
+dependencies:
+  analyzer: ^7.0.0
+  args: ^2.5.0
+  path: ^1.9.0
+  glob: ^2.1.2
+  http: ^1.2.0
+  yaml: ^3.1.0
+  vm_service: ^15.0.0
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0

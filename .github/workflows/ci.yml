@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Flutter SDK (not just Dart) is needed: the rule tests analyze
+      # test/fixtures/sample_app, a Flutter app.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: dart pub get
+      - run: flutter pub get
+        working-directory: test/fixtures/sample_app
+
+      - run: dart analyze --fatal-infos
+      - run: dart test
+      - run: dart pub publish --dry-run
