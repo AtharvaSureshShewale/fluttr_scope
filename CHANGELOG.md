@@ -70,3 +70,6 @@ Rule accuracy, checked against real apps before release:
   actually happens (silent stale or loading UI, not an exception).
 - Baselines record each finding's line text, so a new finding with the same
   message as a known one is reported instead of hidden.
+- Findings on named constructors (`Image.asset(...)`, `ListView.builder(...)`)
+  are reported at the constructor name, the column Flutter's widget-creation
+  tracking uses, so they now join with their runtime rebuild data.

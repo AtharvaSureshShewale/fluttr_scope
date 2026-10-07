@@ -439,9 +439,12 @@ void main() {
         inFile('image_missing_semantic_label', 'accessibility_examples.dart');
     expect(matches, hasLength(1));
 
+    // A named constructor is reported at its name (`network`), the same
+    // column Flutter's widget-creation tracking reports at runtime.
     final (line, column) = locate(
       "Image.network('https://example.com/photo.png'),",
       relativeFile: 'accessibility_examples.dart',
+      columnOf: "network('",
     );
     expect(matches.single.location.line, line);
     expect(matches.single.location.column, column);
@@ -452,9 +455,12 @@ void main() {
         inFile('image_network_without_error_builder', 'accessibility_examples.dart');
     expect(matches, hasLength(1));
 
+    // A named constructor is reported at its name (`network`), the same
+    // column Flutter's widget-creation tracking reports at runtime.
     final (line, column) = locate(
       "Image.network('https://example.com/photo.png'),",
       relativeFile: 'accessibility_examples.dart',
+      columnOf: "network('",
     );
     expect(matches.single.location.line, line);
     expect(matches.single.location.column, column);

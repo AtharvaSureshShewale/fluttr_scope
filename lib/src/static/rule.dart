@@ -34,14 +34,26 @@ SourceLocation locationOf(
   AstNode node,
   RuleContext context,
 ) {
-  final start = unit.lineInfo.getLocation(node.offset);
+  final offset = _joinOffset(node);
+  final start = unit.lineInfo.getLocation(offset);
   return SourceLocation(
     file: relativePath(unit, context),
     line: start.lineNumber,
     column: start.columnNumber,
-    length: node.length,
+    length: node.end - offset,
   );
 }
+
+/// Where [node] starts, by the same convention Flutter's widget-creation
+/// tracking uses for the locations it reports at runtime -- so a finding on
+/// a widget and that widget's rebuild data share the exact file:line:column
+/// join key. For a constructor call that's the constructor name: `asset`
+/// in `Image.asset(...)`, `Text` in `const Text(...)` (no keyword).
+int _joinOffset(AstNode node) => switch (node) {
+      InstanceCreationExpression(:final constructorName) =>
+        constructorName.name?.offset ?? constructorName.offset,
+      _ => node.offset,
+    };
 
 /// Builds the [SourceLocation] of [token] within [unit] -- for pointing a
 /// finding at a declaration's *name* rather than its first token, which
