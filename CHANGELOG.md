@@ -8,6 +8,10 @@
   ones handed in from elsewhere or never assigned.
 - `setstate_in_build` is now info: Flutter ignores a rebuild request made
   during a widget's own build, so it's pointless code, not a crash.
+- `measure` / `prioritize` report a failed app launch (build error, unknown
+  device) as soon as `flutter run` exits, with its last lines of output,
+  instead of waiting for the timeout and printing a stack trace; multi-run
+  stops after the first failed launch.
 
 ## 0.1.0
 

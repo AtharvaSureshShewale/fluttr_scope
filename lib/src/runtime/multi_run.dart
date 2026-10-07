@@ -249,6 +249,10 @@ Future<MultiRunSummary> measureMultipleRuns({
         dartVmVersion: result.dartVmVersion,
         widgetFrameImpacts: computeWidgetFrameImpacts(steadyPerFrameRebuilds, capture.steadyState),
       ));
+    } on AppLaunchException catch (e) {
+      // The same build would fail the same way: don't repeat it per run.
+      invalidRuns.add(InvalidRun(runIndex: i, reason: e.describe()));
+      break;
     } catch (e) {
       invalidRuns.add(InvalidRun(runIndex: i, reason: e.toString()));
     }

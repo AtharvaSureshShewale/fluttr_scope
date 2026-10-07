@@ -103,12 +103,18 @@ class MeasureCommand extends Command<int> {
         'Launching on $device (debug mode) and capturing rebuilds for ${seconds}s...',
       );
 
-      final result = await RuntimeDriver().measure(
-        targetArg,
-        duration: Duration(seconds: seconds),
-        device: device,
-        onLaunchOutput: onLaunchOutput,
-      );
+      final MeasurementResult result;
+      try {
+        result = await RuntimeDriver().measure(
+          targetArg,
+          duration: Duration(seconds: seconds),
+          device: device,
+          onLaunchOutput: onLaunchOutput,
+        );
+      } on AppLaunchException catch (e) {
+        stderr.writeln(e.describe());
+        return 1;
+      }
       result.rebuilds.sort((a, b) => b.rebuildCount.compareTo(a.rebuildCount));
       result.frames.sort((a, b) => a.frameNumber.compareTo(b.frameNumber));
 

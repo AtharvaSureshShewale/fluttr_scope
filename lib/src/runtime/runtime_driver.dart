@@ -28,6 +28,27 @@ const _trackRebuildsExtension = 'ext.flutter.inspector.trackRebuildDirtyWidgets'
 /// `!kReleaseMode`) would actually work in profile mode too, but debug is
 /// kept as the one mode for both, since rebuild tracking is the harder
 /// constraint.
+/// The app couldn't be launched: `flutter run` failed (a build error, no
+/// such device) or never started the app. [outputTail] holds its last
+/// lines of output, where the actual error usually is.
+class AppLaunchException implements Exception {
+  final String message;
+  final List<String> outputTail;
+
+  AppLaunchException(this.message, List<String> outputTail)
+      : outputTail = List.unmodifiable(outputTail);
+
+  @override
+  String toString() => message;
+
+  /// [message] followed by the last lines of `flutter run` output.
+  String describe() => [
+        message,
+        if (outputTail.isNotEmpty) 'Last lines of flutter run output:',
+        for (final line in outputTail) '  $line',
+      ].join('\n');
+}
+
 class RuntimeDriver {
   Future<MeasurementResult> measure(
     String targetPath, {
@@ -46,11 +67,20 @@ class RuntimeDriver {
     );
 
     final vmServiceUri = Completer<Uri>();
+    // The last lines flutter run printed, for explaining a failed launch:
+    // a build error is at the end of the output, not the start.
+    final recentOutput = <String>[];
+    void remember(String line) {
+      recentOutput.add(line);
+      if (recentOutput.length > 25) recentOutput.removeAt(0);
+      onLaunchOutput?.call(line);
+    }
+
     final stdoutSub = process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-      onLaunchOutput?.call(line);
+      remember(line);
       if (!vmServiceUri.isCompleted) {
         final uri = parseVmServiceUri(line);
         if (uri != null) vmServiceUri.complete(uri);
@@ -59,16 +89,24 @@ class RuntimeDriver {
     final stderrSub = process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(onLaunchOutput);
+        .listen(remember);
 
     try {
-      final httpUri = await vmServiceUri.future.timeout(
+      // flutter run exiting before the app is up (a build error, no such
+      // device) is reported as soon as it happens, not after the timeout.
+      final httpUri = await Future.any([
+        vmServiceUri.future,
+        process.exitCode.then<Uri>((code) => throw AppLaunchException(
+              'flutter run exited with code $code before the app started.',
+              recentOutput,
+            )),
+      ]).timeout(
         launchTimeout,
-        onTimeout: () => throw StateError(
-          'flutter run never printed a VM Service URI within '
-          '${launchTimeout.inSeconds}s. A first build (Gradle/CMake '
-          'fetching dependencies) can be slow — rerunning is often faster '
-          'once the build cache is warm.',
+        onTimeout: () => throw AppLaunchException(
+          'The app did not start within ${launchTimeout.inSeconds}s. A first build '
+          '(Gradle/CMake fetching dependencies) can be slow; rerunning is often '
+          'faster once the build cache is warm.',
+          recentOutput,
         ),
       );
 
