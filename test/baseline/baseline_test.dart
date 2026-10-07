@@ -41,6 +41,57 @@ void main() {
     expect(result, hasLength(2));
   });
 
+  group('with line text', () {
+    // file -> lines, 1-based via the reader below.
+    LineTextReader reader(Map<String, List<String>> files) =>
+        (file, line) => files[file]?[line - 1];
+
+    test('a new finding with the same message as a known one is the one reported', () {
+      // Found on a real app: the old count-only matching hid the *new*
+      // setState (it came first in the file) and reported the known one.
+      final before = {'lib/main.dart': ['x', 'setState(() => a = 1);']};
+      final baseline = Baseline.fromFindings(
+        [_finding('missing_mounted_check', 2)],
+        lineText: reader(before),
+      );
+
+      final after = {
+        'lib/main.dart': ['x', '  setState(() {});', 'y', '  setState(() => a = 1);'],
+      };
+      final result = baseline.filterNew(
+        [_finding('missing_mounted_check', 2), _finding('missing_mounted_check', 4)],
+        lineText: reader(after),
+      );
+      expect(result.map((f) => f.location.line), [2]);
+    });
+
+    test('a known finding whose line was edited still counts as known', () {
+      final baseline = Baseline.fromFindings(
+        [_finding('avoid_print', 1)],
+        lineText: reader({'lib/main.dart': ["print('a');"]}),
+      );
+      final result = baseline.filterNew(
+        [_finding('avoid_print', 1)],
+        lineText: reader({'lib/main.dart': ["print('a, edited');"]}),
+      );
+      expect(result, isEmpty);
+    });
+
+    test('a version-1 baseline without line text still loads and matches by count', () {
+      final v1 = Baseline.fromJson({
+        'version': 1,
+        'entries': [
+          {'ruleId': 'avoid_print', 'file': 'lib/main.dart', 'message': 'msg', 'count': 1},
+        ],
+      });
+      final result = v1.filterNew(
+        [_finding('avoid_print', 7), _finding('avoid_print', 9)],
+        lineText: reader({'lib/main.dart': List.filled(10, "print('x');")}),
+      );
+      expect(result, hasLength(1));
+    });
+  });
+
   test('round-trips through a file', () async {
     final dir = await Directory.systemTemp.createTemp('fluttr_scope_baseline');
     addTearDown(() => dir.delete(recursive: true));

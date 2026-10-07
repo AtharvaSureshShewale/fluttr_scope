@@ -85,13 +85,14 @@ class AnalyzeCommand extends Command<int> {
     final baselineArg = argResults!['baseline'] as String?;
     if (argResults!['write-baseline'] as bool) {
       final path = baselineArg ?? p.join(targetArg, defaultBaselineFileName);
-      await Baseline.fromFindings(findings).save(path);
+      await Baseline.fromFindings(findings, lineText: projectLineReader(targetArg)).save(path);
       stderr.writeln('Wrote ${findings.length} finding(s) to $path.');
       return 0;
     }
     if (baselineArg != null) {
       final before = findings.length;
-      findings = Baseline.load(baselineArg).filterNew(findings);
+      findings = Baseline.load(baselineArg)
+          .filterNew(findings, lineText: projectLineReader(targetArg));
       stderr.writeln('${before - findings.length} finding(s) hidden by baseline $baselineArg.');
     }
 
