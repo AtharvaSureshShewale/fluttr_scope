@@ -225,7 +225,6 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 ### Correctness
 | Rule | Default | Flags |
 |---|---|---|
-| `setstate_in_build` | error | `setState` called directly during `build()` |
 | `unbounded_scrollable_in_flex` | error | A scrollable directly in a `Column` / `Row` without `Expanded` |
 | `expanded_outside_flex` | error | `Expanded` / `Flexible` outside a `Column` / `Row` / `Flex` |
 | `positioned_outside_stack` | error | `Positioned` outside a `Stack` |
@@ -244,6 +243,7 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 | `stream_builder_missing_error_check` | warning | `StreamBuilder` that never checks `snapshot.hasError` |
 | `image_network_without_error_builder` | info | `Image.network` with no `errorBuilder` |
 | `scaffold_missing_body` | info | `Scaffold` with no `body` |
+| `setstate_in_build` | info | `setState` inside a widget's own `build()`, which Flutter ignores |
 
 ### Security
 | Rule | Default | Flags |
@@ -289,7 +289,7 @@ open-source [Ente Photos](https://github.com/ente-io/ente),
 [LocalSend](https://github.com/localsend/localsend)), each hit checked by
 hand, and false positives fixed. These rules never fired on any of them, so
 they're only tested against small examples so far (most catch crashes that
-rarely survive into committed code): `bottom_navigation_bar_too_few_items`, `container_color_and_decoration_conflict`, `flex_value_non_positive`, `inherited_widget_of_in_initstate`, `insecure_certificate_validation`, `insecure_random_for_secret`, `invalid_aspect_ratio`, `nested_scaffold`, `opacity_out_of_range`, `sensitive_query_param`, `setstate_in_build`, `slider_invalid_range`, `sql_table_missing_constraints`, `unrestricted_webview_javascript`.
+rarely survive into committed code): `bottom_navigation_bar_too_few_items`, `container_color_and_decoration_conflict`, `flex_value_non_positive`, `inherited_widget_of_in_initstate`, `insecure_certificate_validation`, `insecure_random_for_secret`, `invalid_aspect_ratio`, `nested_scaffold`, `opacity_out_of_range`, `sensitive_query_param`, `slider_invalid_range`, `sql_table_missing_constraints`, `unrestricted_webview_javascript`.
 
 ## Using it as a library
 

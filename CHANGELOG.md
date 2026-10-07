@@ -4,6 +4,10 @@
   3.9 / Flutter 3.35, and also runs on current stable. Findings on seven real
   apps are identical before and after. CI now tests Flutter 3.35.2 and the
   latest stable.
+- `dispose_missing` only flags controllers the class creates itself, not
+  ones handed in from elsewhere or never assigned.
+- `setstate_in_build` is now info: Flutter ignores a rebuild request made
+  during a widget's own build, so it's pointless code, not a crash.
 
 ## 0.1.0
 

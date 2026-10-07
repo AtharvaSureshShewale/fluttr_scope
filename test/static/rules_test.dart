@@ -255,6 +255,10 @@ void main() {
     labelledFixtureTests('secret_real_world_examples.dart', ['hardcoded_secret']);
   });
 
+  group('dispose_missing on real-world shapes (dispose_real_world_examples.dart)', () {
+    labelledFixtureTests('dispose_real_world_examples.dart', ['dispose_missing']);
+  });
+
   group('sql_injection_risk on real-world shapes (sql_real_world_examples.dart)', () {
     labelledFixtureTests('sql_real_world_examples.dart', ['sql_injection_risk']);
   });
