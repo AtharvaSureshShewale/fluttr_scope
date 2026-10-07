@@ -73,3 +73,5 @@ Rule accuracy, checked against real apps before release:
 - Findings on named constructors (`Image.asset(...)`, `ListView.builder(...)`)
   are reported at the constructor name, the column Flutter's widget-creation
   tracking uses, so they now join with their runtime rebuild data.
+- `prioritize` only ranks *performance* findings as hot: slow frames aren't
+  evidence for an accessibility or security finding that merely ran.

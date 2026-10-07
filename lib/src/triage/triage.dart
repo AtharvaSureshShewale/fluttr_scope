@@ -1,3 +1,4 @@
+import '../model/category.dart';
 import '../model/finding.dart';
 import '../model/source_location.dart';
 import '../runtime/executed_lines.dart';
@@ -8,7 +9,7 @@ import '../runtime/widget_frame_impact.dart';
 /// How much runtime evidence backs a static finding -- the order to look
 /// at findings in, most urgent first.
 enum RuntimeEvidence {
-  /// The widget at this location rebuilt during slow frames.
+  /// A performance finding whose widget rebuilt during slow frames.
   hot,
 
   /// This code ran during the session.
@@ -72,11 +73,16 @@ TriagedFinding _triage(
       TriagedFinding(finding: finding, evidence: e, impact: impact);
 
   if (impact != null) {
+    // Slow frames are only evidence *for* a performance finding. A missing
+    // semantic label on an image that happened to be on screen while
+    // scrolling was slow says nothing about the label -- for any other
+    // category, rebuild data just proves the code ran.
     final slowFrames = impact.classification == ImpactClassification.highRebuildHighImpact ||
         impact.classification == ImpactClassification.lowRebuildHighImpact;
-    return result(slowFrames && impact.confidence != Confidence.low
-        ? RuntimeEvidence.hot
-        : RuntimeEvidence.ran);
+    final hot = finding.category == Category.performance &&
+        slowFrames &&
+        impact.confidence != Confidence.low;
+    return result(hot ? RuntimeEvidence.hot : RuntimeEvidence.ran);
   }
 
   final loc = finding.location;

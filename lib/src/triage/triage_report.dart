@@ -22,7 +22,7 @@ class TriageContext {
 }
 
 String _evidenceLabel(RuntimeEvidence e) => switch (e) {
-      RuntimeEvidence.hot => 'ran during slow frames',
+      RuntimeEvidence.hot => 'performance finding(s) whose widget rebuilt during slow frames',
       RuntimeEvidence.ran => 'ran during the session',
       RuntimeEvidence.notRun => 'never ran in this session',
       RuntimeEvidence.noSignal => 'no runtime signal (config files, constants, tests)',
@@ -79,7 +79,7 @@ String formatTriageReport(
     }
   }
 
-  section('🔥 RAN DURING SLOW FRAMES -- fix these first', byEvidence[RuntimeEvidence.hot]!);
+  section('🔥 REBUILT DURING SLOW FRAMES -- fix these first', byEvidence[RuntimeEvidence.hot]!);
   section('▶ RAN DURING THE SESSION', byEvidence[RuntimeEvidence.ran]!);
   section(
     '⚠ ERRORS AND WARNINGS WITHOUT RUNTIME EVIDENCE',

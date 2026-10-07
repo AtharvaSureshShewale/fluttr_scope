@@ -81,10 +81,14 @@ widget rebuilds and frame timing. Then it ranks every finding:
 
 | | Meaning |
 |---|---|
-| 🔥 | The widget rebuilt during slow frames: fix first |
+| 🔥 | A performance finding whose widget rebuilt during slow frames: fix first |
 | ▶ | The code ran during the session |
 | ○ | Never ran in this session (or the file was never loaded) |
 | — | No runtime signal: manifests, `pubspec.lock`, constants, tests |
+
+Rebuild and frame data attaches to findings located on a widget's
+constructor call (such as `missing_const_constructor`), so only those can
+reach 🔥; every other finding is ranked by whether its code ran.
 
 Use the app while it's measured, so the screens you care about actually
 run. Runtime evidence only ranks findings: errors and warnings are always

@@ -90,6 +90,20 @@ void main() {
       ]);
     });
 
+    test('only a performance finding can be hot -- slow frames say nothing about others', () {
+      // Found on a real app: images missing a semantic label were ranked
+      // hot because they were on screen while scrolling was slow.
+      final a11y = Finding(
+        ruleId: 'image_missing_semantic_label',
+        category: Category.accessibility,
+        severity: Severity.info,
+        message: 'm',
+        location: const SourceLocation(file: 'lib/a.dart', line: 7, column: 1, length: 1),
+      );
+      final result = triage([a11y], impacts: [_impact(a11y.location, rebuilds: 400, overBudget: 8)]);
+      expect(result.single.evidence, RuntimeEvidence.ran);
+    });
+
     test('coverage decides ran / not run / no signal for any rule', () {
       const executed = ExecutedLines(
         hits: {'lib/a.dart': {10}},
