@@ -165,7 +165,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _isBuildContextType(Expression expr) {
     final type = expr.staticType;
-    return type is InterfaceType && type.element3.name3 == 'BuildContext';
+    return type is InterfaceType && type.element.name == 'BuildContext';
   }
 
   /// Whether [node]'s left-hand side names a field declared on the
@@ -187,7 +187,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     for (var current = node.parent; current != null; current = current.parent) {
       if (current is ClassDeclaration) {
-        return current.members
+        return current.body.members
             .whereType<FieldDeclaration>()
             .any((f) => f.fields.variables.any((v) => v.name.lexeme == name));
       }

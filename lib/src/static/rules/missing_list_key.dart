@@ -107,7 +107,7 @@ class _StatefulCreationFinder extends RecursiveAstVisitor<void> {
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
     final type = node.staticType;
     if (type is InterfaceType) {
-      final names = {type.element3.name3, for (final t in type.allSupertypes) t.element3.name3};
+      final names = {type.element.name, for (final t in type.allSupertypes) t.element.name};
       final isStateful = names.contains('StatefulWidget');
       if (isStateful &&
           (!isFrameworkWidget(node) || names.any(_statefulFrameworkWidgets.contains))) {

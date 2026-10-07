@@ -57,7 +57,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   bool _isSharedPreferences(Expression? target) {
     final type = target?.staticType;
-    return type is InterfaceType && type.element3.name3 == 'SharedPreferences';
+    return type is InterfaceType && type.element.name == 'SharedPreferences';
   }
 
   bool _hasSensitiveKey(Expression keyArg) {

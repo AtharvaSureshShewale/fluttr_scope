@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
 import '../../model/category.dart';
@@ -60,13 +60,13 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
 bool _isFlutterWidgetType(DartType? type) {
   if (type is! InterfaceType) return false;
-  if (_isWidgetElement(type.element3)) return true;
-  return type.allSupertypes.any((t) => _isWidgetElement(t.element3));
+  if (_isWidgetElement(type.element)) return true;
+  return type.allSupertypes.any((t) => _isWidgetElement(t.element));
 }
 
-bool _isWidgetElement(InterfaceElement2 element) {
-  return element.name3 == 'Widget' &&
-      element.library2.uri.toString().startsWith('package:flutter/');
+bool _isWidgetElement(InterfaceElement element) {
+  return element.name == 'Widget' &&
+      element.library.uri.toString().startsWith('package:flutter/');
 }
 
 /// Whether every argument in [node] is a literal or a nested constructor

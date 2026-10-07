@@ -64,13 +64,13 @@ Map<VariableDeclaration, String> _disposableFields(
   ClassDeclaration classNode,
 ) {
   final result = <VariableDeclaration, String>{};
-  for (final member in classNode.members) {
+  for (final member in classNode.body.members) {
     if (member is! FieldDeclaration) continue;
     // Not `.toSource()`: that includes generic args and the nullability
     // suffix (`StreamSubscription<int>?`), which would never match a plain
     // key in _disposableTypes. `NamedType.name2` is the bare type name.
     final type = member.fields.type;
-    final typeName = type is NamedType ? type.name2.lexeme : null;
+    final typeName = type is NamedType ? type.name.lexeme : null;
     final disposeMethod = _disposableTypes[typeName];
     if (disposeMethod == null) continue;
     for (final variable in member.fields.variables) {
@@ -83,7 +83,7 @@ Map<VariableDeclaration, String> _disposableFields(
 /// Field name -> method name (`dispose`/`cancel`) invoked on it anywhere in
 /// the class's `dispose()` method body.
 Map<String, String> _disposedFieldNames(ClassDeclaration classNode) {
-  final disposeMethod = classNode.members
+  final disposeMethod = classNode.body.members
       .whereType<MethodDeclaration>()
       .where((m) => m.name.lexeme == 'dispose')
       .firstOrNull;

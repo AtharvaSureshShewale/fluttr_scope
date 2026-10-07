@@ -84,7 +84,7 @@ bool _isPlainSingleChild(InstanceCreationExpression flex) {
   }
   final type = child?.staticType;
   if (type is! InterfaceType) return true;
-  final names = {type.element3.name3, for (final t in type.allSupertypes) t.element3.name3};
+  final names = {type.element.name, for (final t in type.allSupertypes) t.element.name};
   return !names.any(_flexChildTypes.contains);
 }
 
@@ -190,8 +190,9 @@ class _WidgetMethodVisitor extends RecursiveAstVisitor<void> {
     // Not `.toSource()`: a nullable return type (`Widget?`) would include
     // the `?` and never match — same class of bug as creationTypeName.
     final returnType = node.returnType;
-    final returnTypeName = returnType is NamedType ? returnType.name2.lexeme : null;
-    final enclosing = node.parent;
+    final returnTypeName = returnType is NamedType ? returnType.name.lexeme : null;
+    // A member's parent is the class *body*; the declaration is above it.
+    final enclosing = node.parent?.parent;
     if (node.name.lexeme != 'build' &&
         returnTypeName == 'Widget' &&
         !node.isStatic &&

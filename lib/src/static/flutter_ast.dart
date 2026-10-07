@@ -8,7 +8,7 @@ import 'package:analyzer/dart/element/type.dart';
 bool extendsClassNamed(ClassDeclaration classNode, String className) {
   final element = classNode.declaredFragment?.element;
   if (element == null) return false;
-  return element.allSupertypes.any((t) => t.element3.name3 == className);
+  return element.allSupertypes.any((t) => t.element.name == className);
 }
 
 class ClassVisitor extends RecursiveAstVisitor<void> {
@@ -48,7 +48,7 @@ class BuildMethodVisitor extends RecursiveAstVisitor<void> {
 /// text (`"FutureBuilder<String>"`), which silently breaks any `==`
 /// comparison against a plain type name.
 String creationTypeName(InstanceCreationExpression node) =>
-    node.constructorName.type.name2.lexeme;
+    node.constructorName.type.name.lexeme;
 
 /// The widget creation [node] is passed to as an argument (`child:`,
 /// `children: [...]`, ...), or `null` if that isn't visible from [node]'s
@@ -83,7 +83,7 @@ InstanceCreationExpression? visibleParentWidget(AstNode node) {
 bool isFrameworkWidget(InstanceCreationExpression creation) {
   final type = creation.staticType;
   return type is InterfaceType &&
-      type.element3.library2.uri.toString().startsWith('package:flutter/');
+      type.element.library.uri.toString().startsWith('package:flutter/');
 }
 
 /// Whether [node]'s nearest enclosing function literal, walking up toward

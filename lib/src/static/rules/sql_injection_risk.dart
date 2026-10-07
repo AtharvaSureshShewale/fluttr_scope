@@ -2,7 +2,7 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 
 import '../../model/category.dart';
 import '../../model/finding.dart';
@@ -112,15 +112,15 @@ bool _isSafeValue(Expression e) {
   if (type != null && (type.isDartCoreInt || type.isDartCoreDouble || type.isDartCoreNum || type.isDartCoreBool)) {
     return true;
   }
-  final (Element2? element, String? name) = switch (e.unParenthesized) {
+  final (Element? element, String? name) = switch (e.unParenthesized) {
     Identifier(:final element, :final name) => (element, name.split('.').last),
     PropertyAccess(:final propertyName) => (propertyName.element, propertyName.name),
     _ => (null, null),
   };
   if (name == null) return false;
   final isConst = switch (element) {
-    PropertyAccessorElement2(:final variable3) => variable3?.isConst ?? false,
-    VariableElement2(:final isConst) => isConst,
+    PropertyAccessorElement(:final variable) => variable.isConst,
+    VariableElement(:final isConst) => isConst,
     _ => false,
   };
   return isConst || _schemaName.hasMatch(name) || _placeholderName.hasMatch(name);

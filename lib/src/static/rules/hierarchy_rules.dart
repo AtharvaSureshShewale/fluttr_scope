@@ -108,7 +108,7 @@ class _RequiredParentVisitor extends RecursiveAstVisitor<void> {
   bool _isRequiredParent(InstanceCreationExpression creation) {
     final type = creation.staticType;
     if (type is! InterfaceType) return requiredParents.contains(creationTypeName(creation));
-    return requiredParents.contains(type.element3.name3) ||
-        type.allSupertypes.any((t) => requiredParents.contains(t.element3.name3));
+    return requiredParents.contains(type.element.name) ||
+        type.allSupertypes.any((t) => requiredParents.contains(t.element.name));
   }
 }

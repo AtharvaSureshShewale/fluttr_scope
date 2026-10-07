@@ -33,7 +33,7 @@ class MissingMountedCheckRule extends StaticRule {
     unit.unit.accept(ClassVisitor((classNode) {
       if (!extendsClassNamed(classNode, 'State')) return;
 
-      for (final member in classNode.members) {
+      for (final member in classNode.body.members) {
         if (member is! MethodDeclaration) continue;
         final body = member.body;
         if (body is! BlockFunctionBody) continue;

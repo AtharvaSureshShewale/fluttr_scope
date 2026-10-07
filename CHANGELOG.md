@@ -1,3 +1,10 @@
+## Unreleased
+
+- Upgraded to analyzer 12.1 (from 7.7): the newest that still runs on Dart
+  3.9 / Flutter 3.35, and also runs on current stable. Findings on seven real
+  apps are identical before and after. CI now tests Flutter 3.35.2 and the
+  latest stable.
+
 ## 0.1.0
 
 First public release.
