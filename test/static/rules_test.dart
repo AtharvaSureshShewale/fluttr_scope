@@ -255,6 +255,31 @@ void main() {
     labelledFixtureTests('secret_real_world_examples.dart', ['hardcoded_secret']);
   });
 
+  group('sql_injection_risk on real-world shapes (sql_real_world_examples.dart)', () {
+    labelledFixtureTests('sql_real_world_examples.dart', ['sql_injection_risk']);
+  });
+
+  group('scaffold_missing_body on real-world shapes (scaffold_real_world_examples.dart)', () {
+    labelledFixtureTests('scaffold_real_world_examples.dart', ['scaffold_missing_body']);
+  });
+
+  group('network literal rules on real-world shapes (network_literal_real_world_examples.dart)',
+      () {
+    labelledFixtureTests(
+      'network_literal_real_world_examples.dart',
+      ['hardcoded_ip_address', 'insecure_http_url'],
+    );
+
+    test('test files are skipped: their IPs and URLs are test data', () {
+      expect(
+        findings.where((f) =>
+            f.location.file == 'test/network_literals_test.dart' &&
+            (f.ruleId == 'hardcoded_ip_address' || f.ruleId == 'insecure_http_url')),
+        isEmpty,
+      );
+    });
+  });
+
   test('positioned_outside_stack flags Positioned outside a Stack', () {
     final matches = inFile('positioned_outside_stack', 'hierarchy_examples.dart');
     expect(matches, hasLength(1));

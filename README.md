@@ -279,6 +279,14 @@ Ids in **bold** are the ones runtime evidence attaches to most directly.
 Rules favour precision over recall: when a rule can't be sure, it stays
 quiet rather than report a false positive.
 
+Every rule was run against seven real Flutter apps (four private, plus the
+open-source [Ente Photos](https://github.com/ente-io/ente),
+[Spotube](https://github.com/KRTirtho/spotube) and
+[LocalSend](https://github.com/localsend/localsend)), each hit checked by
+hand, and false positives fixed. These rules never fired on any of them, so
+they're only tested against small examples so far (most catch crashes that
+rarely survive into committed code): `bottom_navigation_bar_too_few_items`, `container_color_and_decoration_conflict`, `flex_value_non_positive`, `inherited_widget_of_in_initstate`, `insecure_certificate_validation`, `insecure_random_for_secret`, `invalid_aspect_ratio`, `nested_scaffold`, `opacity_out_of_range`, `sensitive_query_param`, `setstate_in_build`, `slider_invalid_range`, `sql_table_missing_constraints`, `unrestricted_webview_javascript`.
+
 ## Using it as a library
 
 ```dart

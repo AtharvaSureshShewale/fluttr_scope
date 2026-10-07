@@ -42,8 +42,12 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    // Flutter's own Scaffold only: UI libraries ship their own `Scaffold`
+    // with different slots (e.g. `headers:`/`child:`), and matching the
+    // name alone flagged every screen of an app built on one.
     if (creationTypeName(node) == 'Scaffold' &&
-        node.constructorName.name == null) {
+        node.constructorName.name == null &&
+        isFrameworkWidget(node)) {
       onMatch(node);
     }
     super.visitInstanceCreationExpression(node);

@@ -60,3 +60,13 @@ Rule accuracy, checked against real apps before release:
   method name instead of its doc comment or `@override`.
 - `avoid_print`, `shrinkwrap_listview`, and `setstate_in_list_builder`
   default to info (advisory; raise them in `fluttr_scope.yaml`).
+- `sql_injection_risk` no longer flags queries that only splice in schema
+  names, constants, numbers, or `?` placeholder lists.
+- `scaffold_missing_body` only flags Flutter's own `Scaffold`, not a UI
+  library's.
+- `hardcoded_ip_address` and `insecure_http_url` skip test files and text
+  shown to the user (`Text(...)`, hints, labels).
+- `FutureBuilder`/`StreamBuilder` error-check message now describes what
+  actually happens (silent stale or loading UI, not an exception).
+- Baselines record each finding's line text, so a new finding with the same
+  message as a known one is reported instead of hidden.

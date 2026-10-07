@@ -8,9 +8,12 @@ import '../../model/severity.dart';
 import '../flutter_ast.dart';
 import '../rule.dart';
 
+// FutureBuilder/StreamBuilder catch the error themselves and hand it to
+// the builder as `snapshot.error` -- nothing is thrown. The failure mode is
+// silence: the user sees stale data or a spinner that never ends.
 const _errorCheckMessage =
-    "This builder never checks `snapshot.hasError` — an error becomes an "
-    "unhandled exception instead of an error state shown to the user.";
+    "This builder never checks `snapshot.hasError`, so if the future or stream "
+    "fails, the user keeps seeing the loading state or old data with no error shown.";
 
 /// Flags a `FutureBuilder` whose `builder` never checks `snapshot.hasError`.
 class FutureBuilderMissingErrorCheckRule extends StaticRule {

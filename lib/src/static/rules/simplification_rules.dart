@@ -103,8 +103,9 @@ class EmptyFlexChildrenRule extends StaticRule {
           ruleId: id,
           category: Category.style,
           severity: Severity.info,
-          message: '`${creationTypeName(node)}` has no '
-              'children — likely leftover placeholder code.',
+          message: '`${creationTypeName(node)}` has no children, so it '
+              'renders nothing. If that is intended, `SizedBox.shrink()` says so '
+              'more directly; otherwise it may be leftover placeholder code.',
           location: locationOf(unit, node, context),
         ));
       }

@@ -85,3 +85,13 @@ SourceLocation locationAt(
 
 String relativePath(ResolvedUnitResult unit, RuleContext context) =>
     p.relative(unit.path, from: context.root).replaceAll('\\', '/');
+
+/// Whether [unit] is test code (`test/`, `integration_test/`, or a
+/// `*_test.dart` file) -- where literals like IP addresses and URLs are
+/// test data rather than something the app connects to.
+bool isTestFile(ResolvedUnitResult unit, RuleContext context) {
+  final path = relativePath(unit, context);
+  return path.startsWith('test/') ||
+      path.startsWith('integration_test/') ||
+      path.endsWith('_test.dart');
+}

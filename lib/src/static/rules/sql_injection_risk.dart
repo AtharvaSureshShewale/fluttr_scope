@@ -1,6 +1,8 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element2.dart';
 
 import '../../model/category.dart';
 import '../../model/finding.dart';
@@ -56,9 +58,70 @@ class _Visitor extends RecursiveAstVisitor<void> {
     super.visitMethodInvocation(node);
   }
 
-  bool _isDynamicallyBuilt(Expression expr) {
-    if (expr is StringInterpolation) return true;
-    if (expr is BinaryExpression && expr.operator.lexeme == '+') return true;
-    return false;
+  /// Whether [expr] splices in a value that could carry user input. A
+  /// query interpolating only schema names (`'DELETE FROM $_usersTable'`),
+  /// constants, or numbers can't be injected into, and flagging those was
+  /// nearly all of this rule's hits on a real app with a large database
+  /// layer. A plain literal or a lone variable isn't "built" here at all.
+  bool _isDynamicallyBuilt(Expression expr) => switch (expr.unParenthesized) {
+        StringInterpolation() || BinaryExpression() => _containsUnsafePart(expr),
+        _ => false,
+      };
+}
+
+/// Whether any piece spliced into [expr] could carry user input.
+bool _containsUnsafePart(Expression expr) => switch (expr.unParenthesized) {
+      SimpleStringLiteral() => false,
+      StringInterpolation(:final elements) => elements
+          .whereType<InterpolationExpression>()
+          .any((e) => _containsUnsafePart(e.expression)),
+      BinaryExpression(operator: Token(lexeme: '+'), :final leftOperand, :final rightOperand) =>
+        _containsUnsafePart(leftOperand) || _containsUnsafePart(rightOperand),
+      final value => !_isSafeValue(value),
+    };
+
+/// Names a schema identifier is given: `usersTable`, `_tableName`,
+/// `columnLocalID`, `idColumn`.
+final _schemaName = RegExp(r'^_*(table|column|col|tbl)|(table|column|col|tbl|fields?)s?$', caseSensitive: false);
+
+/// Names for a run of `?` placeholders -- `IN ($placeholders)` is how a
+/// parameterized IN-list is written, the opposite of an injection.
+final _placeholderName = RegExp(r'placeholders?$', caseSensitive: false);
+
+/// `List.filled(n, '?').join(...)`: building `?, ?, ?` for an IN-list.
+bool _isPlaceholderList(Expression e) => switch (e) {
+      MethodInvocation(
+        methodName: SimpleIdentifier(name: 'join'),
+        target: MethodInvocation(
+          methodName: SimpleIdentifier(name: 'filled'),
+          argumentList: ArgumentList(:final arguments),
+        ) ||
+            InstanceCreationExpression(argumentList: ArgumentList(:final arguments)),
+      ) =>
+        arguments.length >= 2 &&
+            arguments[1] is SimpleStringLiteral &&
+            (arguments[1] as SimpleStringLiteral).value.trim() == '?',
+      _ => false,
+    };
+
+/// A value that can't carry an injection: a number or boolean (no quotes
+/// to break out of), a `const`, or a schema name.
+bool _isSafeValue(Expression e) {
+  if (_isPlaceholderList(e.unParenthesized)) return true;
+  final type = e.staticType;
+  if (type != null && (type.isDartCoreInt || type.isDartCoreDouble || type.isDartCoreNum || type.isDartCoreBool)) {
+    return true;
   }
+  final (Element2? element, String? name) = switch (e.unParenthesized) {
+    Identifier(:final element, :final name) => (element, name.split('.').last),
+    PropertyAccess(:final propertyName) => (propertyName.element, propertyName.name),
+    _ => (null, null),
+  };
+  if (name == null) return false;
+  final isConst = switch (element) {
+    PropertyAccessorElement2(:final variable3) => variable3?.isConst ?? false,
+    VariableElement2(:final isConst) => isConst,
+    _ => false,
+  };
+  return isConst || _schemaName.hasMatch(name) || _placeholderName.hasMatch(name);
 }

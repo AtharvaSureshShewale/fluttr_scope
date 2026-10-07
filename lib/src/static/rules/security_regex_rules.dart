@@ -30,8 +30,9 @@ class InsecureHttpUrlRule extends StaticRule {
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
+    if (isTestFile(unit, context)) return findings;
     unit.unit.accept(_StringVisitor((node, value) {
-      if (_httpUrl.hasMatch(value) && !_localHosts.hasMatch(value)) {
+      if (_httpUrl.hasMatch(value) && !_localHosts.hasMatch(value) && !_isDisplayText(node)) {
         findings.add(Finding(
           ruleId: id,
           category: Category.security,
@@ -90,8 +91,9 @@ class HardcodedIpAddressRule extends StaticRule {
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
+    if (isTestFile(unit, context)) return findings;
     unit.unit.accept(_StringVisitor((node, value) {
-      if (_ipAddress.hasMatch(value)) {
+      if (_ipAddress.hasMatch(value) && !_isDisplayText(node)) {
         findings.add(Finding(
           ruleId: id,
           category: Category.security,
@@ -106,6 +108,23 @@ class HardcodedIpAddressRule extends StaticRule {
     return findings;
   }
 }
+
+const _displayTextWidgets = {'Text', 'SelectableText'};
+const _displayTextArguments = {'hintText', 'labelText', 'helperText', 'semanticLabel', 'tooltip'};
+
+/// Whether [node] is text shown to the user -- `Text('...')`, or a hint or
+/// label -- rather than something the app connects to. An example IP in a
+/// settings screen's help text isn't a hardcoded endpoint.
+bool _isDisplayText(SimpleStringLiteral node) => switch (node.parent) {
+      NamedExpression(:final name) => _displayTextArguments.contains(name.label.name),
+      ArgumentList(parent: final InstanceCreationExpression creation) =>
+        _displayTextWidgets.contains(creationTypeName(creation)),
+      // When Flutter itself can't be resolved (a project whose packages
+      // aren't fetched), `Text('...')` parses as a call, not a creation.
+      ArgumentList(parent: MethodInvocation(target: null, :final methodName)) =>
+        _displayTextWidgets.contains(methodName.name),
+      _ => false,
+    };
 
 class _StringVisitor extends RecursiveAstVisitor<void> {
   final void Function(SimpleStringLiteral node, String value) onLiteral;
