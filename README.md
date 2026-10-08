@@ -138,9 +138,10 @@ Re-runs the static rules and attaches rebuild counts from a single saved
   against release.
 - **Without a flow, runs vary.** A capture without `--flow` is a fixed
   window after launch; use the app the same way each run, or numbers will
-  vary (the report tells you when they do). With a flow, the app's work is
-  identical every run, but frame timing still varies with the device; an
-  emulator is noisier than a physical phone.
+  vary (the report tells you when they do). With a flow, the app does the
+  same things every run, but frame timing (and animation-driven rebuild
+  counts) still vary with the device; an emulator is noisier than a
+  physical phone.
 - **60 Hz frame budget is assumed**, not read from the device.
 - **Association, not causation.** "Rebuilt during slow frames" is a
   measured overlap, and the report says so on every finding.
@@ -198,9 +199,12 @@ void main() {
 calls `fluttrScopeDone()`. Outside fluttr_scope (a plain `flutter test`)
 both calls are harmless, so the same file still works as a normal test.
 
-On a real app, three runs of one flow produced exactly the same number of
-widget rebuilds (1,376 each), against about 2% variation when the same
-session was driven by hand-tuned scripted taps.
+A flow makes the *actions* identical every run. Rebuilds driven by
+animations happen once per frame, though, so their count still follows the
+device's frame rate: on an Android emulator, three runs of one flow gave
+identical rebuild counts in one session (1,376 each) and 9.5% variation in
+another, when the emulator was rendering fewer frames. For the steadiest
+numbers, run flows on a physical device.
 
 ## Configuration
 
