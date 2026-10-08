@@ -12,6 +12,9 @@
   device) as soon as `flutter run` exits, with its last lines of output,
   instead of waiting for the timeout and printing a stack trace; multi-run
   stops after the first failed launch.
+- Rules that check widget `build` methods (`future_created_in_build`,
+  `key_created_in_build`, `deeply_nested_widget_tree`, `setstate_in_build`)
+  now also cover Riverpod's `build(BuildContext context, WidgetRef ref)`.
 
 ## 0.1.0
 

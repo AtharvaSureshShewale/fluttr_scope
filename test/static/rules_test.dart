@@ -255,6 +255,13 @@ void main() {
     labelledFixtureTests('secret_real_world_examples.dart', ['hardcoded_secret']);
   });
 
+  group('build-method rules on Riverpod build(context, ref) (riverpod_build_examples.dart)', () {
+    labelledFixtureTests(
+      'riverpod_build_examples.dart',
+      ['key_created_in_build', 'future_created_in_build'],
+    );
+  });
+
   group('dispose_missing on real-world shapes (dispose_real_world_examples.dart)', () {
     labelledFixtureTests('dispose_real_world_examples.dart', ['dispose_missing']);
   });

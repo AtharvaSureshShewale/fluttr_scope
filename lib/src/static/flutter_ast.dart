@@ -23,9 +23,9 @@ class ClassVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Visits every method literally named `build` taking exactly one
-/// parameter — Flutter's `Widget build(BuildContext context)` override,
-/// identified structurally rather than via type resolution.
+/// Visits every widget `build` method: Flutter's `Widget build(BuildContext
+/// context)`, and Riverpod's `Widget build(BuildContext context, WidgetRef
+/// ref)` (`ConsumerWidget`), which a one-parameter check missed entirely.
 class BuildMethodVisitor extends RecursiveAstVisitor<void> {
   final void Function(MethodDeclaration node) onBuildMethod;
 
@@ -33,11 +33,28 @@ class BuildMethodVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    if (node.name.lexeme == 'build' && node.parameters?.parameters.length == 1) {
-      onBuildMethod(node);
-    }
+    if (isWidgetBuildMethod(node)) onBuildMethod(node);
     super.visitMethodDeclaration(node);
   }
+}
+
+/// Whether [node] is a widget's `build` method: named `build`, taking a
+/// `BuildContext` first (plus at most one more parameter, e.g. Riverpod's
+/// `WidgetRef`). An untyped single parameter (`build(context)`) also counts.
+/// Unrelated methods that happen to be called `build` -- a query builder's
+/// `build(String sql, int limit)` -- don't.
+bool isWidgetBuildMethod(MethodDeclaration node) {
+  if (node.name.lexeme != 'build') return false;
+  final params = node.parameters?.parameters ?? const <FormalParameter>[];
+  if (params.isEmpty || params.length > 2) return false;
+  final first = params.first;
+  final type = switch (first) {
+    SimpleFormalParameter(:final type) => type,
+    DefaultFormalParameter(parameter: SimpleFormalParameter(:final type)) => type,
+    _ => null,
+  };
+  if (type is NamedType) return type.name.lexeme == 'BuildContext';
+  return params.length == 1;
 }
 
 /// The base type name a constructor call invokes — e.g. `FutureBuilder`
