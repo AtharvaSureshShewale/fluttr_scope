@@ -59,6 +59,10 @@ class FrameRebuildAccumulator {
 
   FrameRebuildAccumulator({required this.root});
 
+  /// Forgets the per-frame records so far but keeps the location table
+  /// (see [RebuildStatsAccumulator.resetCounts]).
+  void resetRecords() => _records.clear();
+
   void addEvent(Map<String, Object?> data) {
     final locations = data['locations'] as Map<String, Object?>?;
     if (locations != null) {

@@ -187,7 +187,7 @@ class _Visitor extends RecursiveAstVisitor<void> {
 
     for (var current = node.parent; current != null; current = current.parent) {
       if (current is ClassDeclaration) {
-        return current.body.members
+        return classMembers(current)
             .whereType<FieldDeclaration>()
             .any((f) => f.fields.variables.any((v) => v.name.lexeme == name));
       }

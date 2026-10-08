@@ -329,8 +329,9 @@ String formatDeveloperFindingsReport(UnifiedFindingsReport report) {
   }
 
   buffer.writeln();
-  buffer.writeln('Flow: not tracked (this version measures a fixed-duration window, not a '
-      'scripted interaction flow)');
+  buffer.writeln(report.flow == null
+      ? 'Flow: none (a fixed-duration window after launch; use --flow for repeatable runs)'
+      : 'Flow: ${report.flow} (the same interactions every run)');
   buffer.writeln();
   buffer.writeln('Runs: ${report.totalRuns}');
   buffer.writeln('Warm-up: ${report.warmup.inSeconds}s');

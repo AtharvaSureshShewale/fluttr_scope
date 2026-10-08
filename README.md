@@ -90,8 +90,9 @@ Rebuild and frame data attaches to findings located on a widget's
 constructor call (such as `missing_const_constructor`), so only those can
 reach 🔥; every other finding is ranked by whether its code ran.
 
-Use the app while it's measured, so the screens you care about actually
-run. Runtime evidence only ranks findings: errors and warnings are always
+Drive the app with a [flow](#repeatable-flows) (`--flow`), or use it by
+hand while it's measured, so the screens you care about actually run.
+Runtime evidence only ranks findings: errors and warnings are always
 listed, even when the code never ran. Info findings are shown only when
 they ran during slow frames, unless you pass `--all`. `--format json` gives
 every finding with its evidence.
@@ -100,6 +101,7 @@ every finding with its evidence.
 
 ```sh
 fluttr_scope measure [project_dir] --device emulator-5554 --runs 5 --seconds 10 --warmup 3
+fluttr_scope measure [project_dir] --device emulator-5554 --runs 3 --flow integration_test/my_flow_test.dart
 ```
 
 Launches the app with `flutter run`, records widget rebuild counts by
@@ -134,15 +136,71 @@ Re-runs the static rules and attaches rebuild counts from a single saved
   `assert()` and is compiled out of profile/release builds, so absolute
   timings are slower than release. Compare runs against each other, not
   against release.
-- **No scripted interaction yet.** A capture is a fixed window after
-  launch, not a repeatable user flow. Interact with the app the same way
-  each run, or numbers will vary (the report tells you when they do).
+- **Without a flow, runs vary.** A capture without `--flow` is a fixed
+  window after launch; use the app the same way each run, or numbers will
+  vary (the report tells you when they do). With a flow, the app's work is
+  identical every run, but frame timing still varies with the device; an
+  emulator is noisier than a physical phone.
 - **60 Hz frame budget is assumed**, not read from the device.
 - **Association, not causation.** "Rebuilt during slow frames" is a
   measured overlap, and the report says so on every finding.
 - Thresholds (50 rebuilds = high, ≥3 slow frames and ≥30% overlap = high
   impact, run-to-run variation ≤10% = high confidence) are stated judgment
   calls and may change.
+
+## Repeatable flows
+
+A flow is an ordinary `integration_test` file that uses your app: taps,
+scrolls, typing. Pass it with `--flow` and every measured run does exactly
+the same thing, so results are comparable between runs:
+
+```sh
+fluttr_scope prioritize --device emulator-5554 --runs 3 --flow integration_test/checkout_flow_test.dart
+```
+
+Add the two packages it needs:
+
+```yaml
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  fluttr_scope: ^0.1.0
+```
+
+Then mark where the measured session starts and ends:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:fluttr_scope/flow.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:my_app/main.dart' as app;
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('checkout flow', (tester) async {
+    app.main();
+    await tester.pumpAndSettle();
+    await waitForFluttrScope(); // recording starts here: startup is excluded
+
+    await tester.tap(find.text('Add to cart'));
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(Scrollable).first, const Offset(0, -800), 1500);
+    await tester.pumpAndSettle();
+
+    fluttrScopeDone(); // recording stops here
+  });
+}
+```
+
+`--seconds` becomes a time limit: recording stops as soon as the flow
+calls `fluttrScopeDone()`. Outside fluttr_scope (a plain `flutter test`)
+both calls are harmless, so the same file still works as a normal test.
+
+On a real app, three runs of one flow produced exactly the same number of
+widget rebuilds (1,376 each), against about 2% variation when the same
+session was driven by hand-tuned scripted taps.
 
 ## Configuration
 

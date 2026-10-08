@@ -11,6 +11,9 @@ class TriageContext {
   final Duration warmup;
   final Confidence? overallConfidence;
 
+  /// The flow file that drove the runs (`--flow`), or `null` if none did.
+  final String? flow;
+
   const TriageContext({
     required this.device,
     required this.validRuns,
@@ -18,6 +21,7 @@ class TriageContext {
     required this.captureDuration,
     required this.warmup,
     required this.overallConfidence,
+    this.flow,
   });
 }
 
@@ -47,9 +51,12 @@ String formatTriageReport(
   final buffer = StringBuffer();
   buffer.writeln('WHAT TO FIX FIRST');
   buffer.writeln('-' * 17);
+  final how = context.flow == null
+      ? 'x ${context.captureDuration.inSeconds}s'
+      : 'driven by ${context.flow} (each stopped when the flow finished)';
   buffer.writeln(
-    'Measured: ${context.validRuns} of ${context.requestedRuns} run(s) x '
-    '${context.captureDuration.inSeconds}s on ${context.device}, debug mode'
+    'Measured: ${context.validRuns} of ${context.requestedRuns} run(s) $how on ${context.device}, '
+    'debug mode'
     '${context.warmup > Duration.zero ? ' (${context.warmup.inSeconds}s warm-up excluded from frame stats)' : ''}',
   );
   if (context.overallConfidence case final c?) {

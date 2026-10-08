@@ -11,6 +11,14 @@ bool extendsClassNamed(ClassDeclaration classNode, String className) {
   return element.allSupertypes.any((t) => t.element.name == className);
 }
 
+/// The members of [classNode]. Works across the analyzer versions this
+/// package supports: in analyzer 10.0 the member list lives on
+/// `BlockClassBody` (a body in braces) only, later on every `ClassBody`.
+List<ClassMember> classMembers(ClassDeclaration classNode) => switch (classNode.body) {
+      BlockClassBody(:final members) => members,
+      _ => const [],
+    };
+
 class ClassVisitor extends RecursiveAstVisitor<void> {
   final void Function(ClassDeclaration node) onClass;
 

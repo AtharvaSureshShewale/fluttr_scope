@@ -46,7 +46,7 @@ RunAnalysis _run(
   );
 }
 
-MultiRunSummary summarize(List<RunAnalysis> runs, {EnvironmentMetadata? environment}) =>
+MultiRunSummary summarize(List<RunAnalysis> runs, {EnvironmentMetadata? environment, String? flow}) =>
     summarizeRuns(
       requestedRuns: runs.length,
       warmup: const Duration(seconds: 5),
@@ -54,6 +54,7 @@ MultiRunSummary summarize(List<RunAnalysis> runs, {EnvironmentMetadata? environm
       validRuns: runs,
       invalidRuns: const [],
       environment: environment,
+      flow: flow,
     );
 
 const _emulatorEnv = EnvironmentMetadata(
@@ -235,7 +236,7 @@ void main() {
       final emulatorLine = diagnosis.recommendations.firstWhere((r) => r.contains('Emulator'));
       expect(emulatorLine, contains('may contribute'));
       expect(emulatorLine, isNot(contains('caused')));
-      expect(diagnosis.recommendations, contains('Run on a physical device and/or make the flow deterministic.'));
+      expect(diagnosis.recommendations, contains('Run on a physical device and/or drive each run with a repeatable flow (--flow).'));
     });
 
     test('a physical-device environment never mentions the emulator', () {
@@ -282,6 +283,38 @@ void main() {
       final report = formatVarianceDiagnosis(diagnosis);
       expect(report, contains('Not observable with the current probe:'));
       expect(report, contains('Network activity'));
+    });
+  });
+
+  group('runs driven by a flow (--flow)', () {
+    const flow = 'integration_test/checkout_flow_test.dart';
+
+    test('identical app work, different frame timing: blames the environment, not the app', () {
+      // Measured on a real app: 1376 rebuilds in every run, 4.0% vs 8.9% slow frames.
+      final runs = [
+        _run(1, overBudgetPercent: 4.6, rebuildCount: 1376),
+        _run(2, overBudgetPercent: 4.0, rebuildCount: 1376),
+        _run(3, overBudgetPercent: 8.9, rebuildCount: 1376),
+      ];
+      final diagnosis = diagnoseVariance(summarize(runs, environment: _emulatorEnv, flow: flow))!;
+      expect(diagnosis.flowDeterminism.deterministic, isTrue);
+      expect(diagnosis.flowDeterminism.explanation, contains(flow));
+      expect(diagnosis.flowDeterminism.explanation, contains('not the app'));
+      expect(diagnosis.flowDeterminism.explanation, isNot(contains('No flow was used')));
+      expect(diagnosis.recommendations.last, contains('the remaining variance is the environment'));
+    });
+
+    test('a flow whose app work still varies is called out as the problem', () {
+      final runs = [
+        _run(1, overBudgetPercent: 20, rebuildCount: 900),
+        _run(2, overBudgetPercent: 40, rebuildCount: 1800),
+        _run(3, overBudgetPercent: 5, rebuildCount: 400),
+      ];
+      final diagnosis = diagnoseVariance(summarize(runs, flow: flow))!;
+      expect(diagnosis.flowDeterminism.deterministic, isFalse);
+      expect(diagnosis.flowDeterminism.explanation, contains('Flow behavior is not deterministic.'));
+      expect(diagnosis.flowDeterminism.explanation, contains('the flow itself'));
+      expect(diagnosis.recommendations.last, startsWith('Make the flow deterministic'));
     });
   });
 }

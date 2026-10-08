@@ -196,6 +196,9 @@ class UnifiedFindingsReport {
   /// rather than inventing a second confidence metric.
   final Confidence overallConfidence;
 
+  /// The flow file that drove the runs (`--flow`), or `null` if none did.
+  final String? flow;
+
   const UnifiedFindingsReport({
     required this.allFindings,
     required this.findings,
@@ -204,6 +207,7 @@ class UnifiedFindingsReport {
     required this.warmup,
     required this.steadyStateDuration,
     required this.overallConfidence,
+    this.flow,
   });
 }
 
@@ -220,6 +224,7 @@ UnifiedFindingsReport buildUnifiedFindings(
   required Duration warmup,
   required Duration steadyStateDuration,
   required Confidence overallConfidence,
+  String? flow,
 }) {
   final matchedLocations = {for (final m in correlation.matched) m.impact.location};
   final runtimeOnlyLocations = {for (final r in correlation.runtimeOnly) r.impact.location};
@@ -270,5 +275,6 @@ UnifiedFindingsReport buildUnifiedFindings(
     warmup: warmup,
     steadyStateDuration: steadyStateDuration,
     overallConfidence: overallConfidence,
+    flow: flow,
   );
 }

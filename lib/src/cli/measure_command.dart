@@ -48,6 +48,13 @@ class MeasureCommand extends Command<int> {
       )
       ..addOption('out', help: 'Write the report to this file instead of stdout.')
       ..addOption(
+        'flow',
+        help: 'An integration_test file that drives the app during each run '
+            '(e.g. integration_test/flow_test.dart), so every run does the same '
+            'thing. Recording starts when the flow is ready and stops when it '
+            'finishes; --seconds becomes the time limit. See README.',
+      )
+      ..addOption(
         'runs',
         defaultsTo: '5',
         help: 'Number of complete measurement runs (each a full app '
@@ -110,6 +117,7 @@ class MeasureCommand extends Command<int> {
           duration: Duration(seconds: seconds),
           device: device,
           onLaunchOutput: onLaunchOutput,
+          flow: argResults!['flow'] as String?,
         );
       } on AppLaunchException catch (e) {
         stderr.writeln(e.describe());
@@ -138,6 +146,7 @@ class MeasureCommand extends Command<int> {
       device: device,
       onLaunchOutput: onLaunchOutput,
       onRunStart: (i, total) => stderr.writeln('Run $i/$total...'),
+      flow: argResults!['flow'] as String?,
     );
 
     final diagnosis = diagnoseVariance(summary);
@@ -189,6 +198,7 @@ class MeasureCommand extends Command<int> {
                     warmup: warmup,
                     steadyStateDuration: Duration(seconds: seconds),
                     overallConfidence: summary.overBudgetPercent!.confidence,
+                    flow: summary.flow,
                   )),
         ].join('\n'),
     };

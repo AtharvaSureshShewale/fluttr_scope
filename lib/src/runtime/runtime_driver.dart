@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
+import '../../flow.dart' show flowDoneEvent, flowStartExtension;
 import 'executed_lines.dart';
 import 'frame_metrics.dart';
 import 'frame_rebuild_accumulator.dart';
@@ -14,6 +15,9 @@ import 'rebuild_stats_accumulator.dart';
 import 'vm_service_uri.dart';
 
 const _trackRebuildsExtension = 'ext.flutter.inspector.trackRebuildDirtyWidgets';
+
+// The handshake with a flow is defined next to the helpers flows use.
+
 
 /// Launches a Flutter app in debug mode, measures widget rebuild counts by
 /// creation location, per-frame build/raster timing, and retained-heap
@@ -56,12 +60,13 @@ class RuntimeDriver {
     String device = 'windows',
     Duration launchTimeout = const Duration(minutes: 5),
     void Function(String line)? onLaunchOutput,
+    String? flow,
   }) async {
     final launchedAt = DateTime.now();
     final root = p.normalize(p.absolute(targetPath));
     final process = await Process.start(
       'flutter',
-      ['run', '-d', device, '--no-devtools'],
+      ['run', '-d', device, '--no-devtools', if (flow != null) ...['-t', flow]],
       workingDirectory: root,
       runInShell: true,
     );
@@ -112,7 +117,7 @@ class RuntimeDriver {
 
       final service = await vmServiceConnectUri(toWebSocketUri(httpUri).toString());
       try {
-        return await _measure(service, root, duration, launchedAt);
+        return await _measure(service, root, duration, launchedAt, flow: flow != null);
       } finally {
         await service.dispose();
       }
@@ -127,8 +132,9 @@ class RuntimeDriver {
     VmService service,
     String root,
     Duration duration,
-    DateTime launchedAt,
-  ) async {
+    DateTime launchedAt, {
+    required bool flow,
+  }) async {
     final vm = await service.getVM();
     final isolateId = vm.isolates!.first.id!;
 
@@ -146,6 +152,7 @@ class RuntimeDriver {
     final accumulator = RebuildStatsAccumulator(root: root);
     final frameRebuildAccumulator = FrameRebuildAccumulator(root: root);
     final frames = <FrameMetrics>[];
+    final flowDone = Completer<void>();
     await service.streamListen(EventStreams.kExtension);
     final eventSub = service.onExtensionEvent.listen((event) {
       switch (event.extensionKind) {
@@ -154,8 +161,11 @@ class RuntimeDriver {
           frameRebuildAccumulator.addEvent(event.extensionData!.data);
         case 'Flutter.Frame':
           frames.add(FrameMetrics.fromExtensionData(event.extensionData!.data));
+        case flowDoneEvent:
+          if (!flowDone.isCompleted) flowDone.complete();
       }
     });
+    bool? flowCompleted;
 
     try {
       await service.callServiceExtension(
@@ -164,7 +174,23 @@ class RuntimeDriver {
         args: {'enabled': 'true'},
       );
 
-      await Future<void>.delayed(duration);
+      if (flow) {
+        // The flow waits for this call before its first action, so nothing
+        // it does goes unrecorded. It registers the extension only once its
+        // app is up, which can take a while after the binding's own.
+        if (await _extensionAppears(service, isolateId, flowStartExtension, const Duration(minutes: 2))) {
+          // Everything so far was app startup, before the flow's first
+          // action: start the measured session clean.
+          frames.clear();
+          accumulator.resetCounts();
+          frameRebuildAccumulator.resetRecords();
+          await service.callServiceExtension(flowStartExtension, isolateId: isolateId);
+        }
+        // Recording ends when the flow says it's done; [duration] caps it.
+        flowCompleted = await flowDone.future.then((_) => true).timeout(duration, onTimeout: () => false);
+      } else {
+        await Future<void>.delayed(duration);
+      }
 
       await service.callServiceExtension(
         _trackRebuildsExtension,
@@ -192,12 +218,30 @@ class RuntimeDriver {
       dartVmVersion: vm.version,
       perFrameRebuilds: frameRebuildAccumulator.records,
       executedLines: executedLines,
+      flowCompleted: flowCompleted,
     );
   }
 
   Future<int> _heapUsageBytes(VmService service, String isolateId) async {
     final profile = await service.getAllocationProfile(isolateId, gc: true);
     return profile.memoryUsage?.heapUsage ?? 0;
+  }
+
+  /// Polls until [isolateId] registers [extensionName]; false if it hasn't
+  /// within [timeout].
+  Future<bool> _extensionAppears(
+    VmService service,
+    String isolateId,
+    String extensionName,
+    Duration timeout,
+  ) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      final isolate = await service.getIsolate(isolateId);
+      if (isolate.extensionRPCs?.contains(extensionName) ?? false) return true;
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    return false;
   }
 
   Future<void> _waitForExtension(

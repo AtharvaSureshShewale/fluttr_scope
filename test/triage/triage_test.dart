@@ -6,6 +6,7 @@ import 'package:fluttr_scope/src/runtime/executed_lines.dart';
 import 'package:fluttr_scope/src/runtime/rebuild_frame_correlation.dart';
 import 'package:fluttr_scope/src/runtime/stats.dart';
 import 'package:fluttr_scope/src/triage/triage.dart';
+import 'package:fluttr_scope/src/triage/triage_report.dart';
 import 'package:test/test.dart';
 
 Finding _finding(
@@ -161,6 +162,28 @@ void main() {
         _finding('b', line: 2, severity: Severity.error),
       ], executed: executed);
       expect(result.map((t) => t.finding.ruleId), ['b', 'a']);
+    });
+  });
+
+  group('report header', () {
+    TriageContext context({String? flow}) => TriageContext(
+          device: 'emulator-5554',
+          validRuns: 2,
+          requestedRuns: 2,
+          captureDuration: const Duration(seconds: 180),
+          warmup: Duration.zero,
+          overallConfidence: null,
+          flow: flow,
+        );
+
+    test('without a flow, states the fixed capture length', () {
+      expect(formatTriageReport(const [], context()), contains('run(s) x 180s'));
+    });
+
+    test('with a flow, names it instead of the time limit', () {
+      final header = formatTriageReport(const [], context(flow: 'integration_test/f_test.dart'));
+      expect(header, contains('driven by integration_test/f_test.dart'));
+      expect(header, isNot(contains('x 180s')));
     });
   });
 }

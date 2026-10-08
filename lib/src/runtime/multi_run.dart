@@ -130,6 +130,9 @@ class MultiRunSummary {
   /// ran in any run ran). `null` if no run captured coverage.
   final ExecutedLines? executedLines;
 
+  /// The flow file that drove every run (`--flow`), or `null` if none did.
+  final String? flow;
+
   const MultiRunSummary({
     required this.requestedRuns,
     required this.warmup,
@@ -143,6 +146,7 @@ class MultiRunSummary {
     required this.dominantBottleneck,
     this.environment,
     this.executedLines,
+    this.flow,
   });
 
   Map<String, Object?> toJson() => {
@@ -157,6 +161,7 @@ class MultiRunSummary {
         'startupWorstFrameMs': startupWorstFrameMs,
         'dominantBottleneck': dominantBottleneck?.name,
         'environment': environment?.toJson(),
+        if (flow != null) 'flow': flow,
       };
 }
 
@@ -195,6 +200,7 @@ Future<MultiRunSummary> measureMultipleRuns({
   Duration launchTimeout = const Duration(minutes: 5),
   void Function(String line)? onLaunchOutput,
   void Function(int runIndex, int totalRuns)? onRunStart,
+  String? flow,
 }) async {
   final validRuns = <RunAnalysis>[];
   final invalidRuns = <InvalidRun>[];
@@ -210,6 +216,7 @@ Future<MultiRunSummary> measureMultipleRuns({
         device: device,
         launchTimeout: launchTimeout,
         onLaunchOutput: onLaunchOutput,
+        flow: flow,
       );
       dartVmVersion ??= result.dartVmVersion;
       // Which lines ran doesn't depend on how many frames rendered, so a
@@ -266,6 +273,7 @@ Future<MultiRunSummary> measureMultipleRuns({
     invalidRuns: invalidRuns,
     environment: detectEnvironment(device: device, dartVmVersion: dartVmVersion),
     executedLines: executedLines,
+    flow: flow,
   );
 }
 
@@ -281,6 +289,7 @@ MultiRunSummary summarizeRuns({
   required List<InvalidRun> invalidRuns,
   EnvironmentMetadata? environment,
   ExecutedLines? executedLines,
+  String? flow,
 }) {
   if (validRuns.isEmpty) {
     return MultiRunSummary(
@@ -291,6 +300,7 @@ MultiRunSummary summarizeRuns({
       invalidRuns: invalidRuns,
       environment: environment,
       executedLines: executedLines,
+      flow: flow,
       overBudgetPercent: null,
       jankClusterCount: null,
       slowestSteadyStateFrameMs: null,
@@ -312,6 +322,7 @@ MultiRunSummary summarizeRuns({
     invalidRuns: invalidRuns,
     environment: environment,
     executedLines: executedLines,
+    flow: flow,
     overBudgetPercent: computeStats([for (final r in validRuns) r.steadyState.overBudgetPercent]),
     jankClusterCount:
         computeStats([for (final r in validRuns) r.steadyState.jankClusters.length.toDouble()]),

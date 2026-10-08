@@ -81,4 +81,27 @@ void main() {
     final acc = RebuildStatsAccumulator(root: _root);
     expect(acc.records, isEmpty);
   });
+
+  test('resetCounts forgets counts but keeps locations sent before it', () {
+    final acc = RebuildStatsAccumulator(root: _root);
+    acc.addEvent({
+      'events': [0, 5],
+      'locations': {
+        _native('lib/main.dart'): {
+          'ids': [0],
+          'lines': [7],
+          'columns': [3],
+          'names': ['Text'],
+        },
+      },
+    });
+    acc.resetCounts();
+    expect(acc.records, isEmpty);
+
+    // After the reset the framework refers to the location by id only.
+    acc.addEvent({'events': [0, 2]});
+    expect(acc.records.single.rebuildCount, 2);
+    expect(acc.records.single.location.file, 'lib/main.dart');
+    expect(acc.records.single.location.line, 7);
+  });
 }

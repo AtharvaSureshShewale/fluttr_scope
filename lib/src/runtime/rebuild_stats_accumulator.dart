@@ -23,6 +23,12 @@ class RebuildStatsAccumulator {
 
   RebuildStatsAccumulator({required this.root});
 
+  /// Forgets the counts so far but keeps the location table: the framework
+  /// sends a location only the first time it's seen, so dropping it would
+  /// lose every location already reported. Used to start counting when a
+  /// flow begins, excluding app startup.
+  void resetCounts() => _countById.clear();
+
   void addEvent(Map<String, Object?> data) {
     final locations = data['locations'] as Map<String, Object?>?;
     if (locations != null) {

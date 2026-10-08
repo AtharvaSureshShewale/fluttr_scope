@@ -58,6 +58,10 @@ class MeasurementResult {
   /// couldn't be read.
   final ExecutedLines? executedLines;
 
+  /// Whether the flow driving this capture finished within the time limit:
+  /// `null` when no flow was used, `false` when it timed out.
+  final bool? flowCompleted;
+
   const MeasurementResult({
     required this.rebuilds,
     required this.heapUsage,
@@ -66,6 +70,7 @@ class MeasurementResult {
     this.dartVmVersion,
     this.perFrameRebuilds = const [],
     this.executedLines,
+    this.flowCompleted,
   });
 
   Map<String, Object?> toJson() => {
@@ -76,6 +81,7 @@ class MeasurementResult {
         'dartVmVersion': dartVmVersion,
         'perFrameRebuilds': perFrameRebuilds.map((r) => r.toJson()).toList(),
         if (executedLines != null) 'executedLines': executedLines!.toJson(),
+        if (flowCompleted != null) 'flowCompleted': flowCompleted,
       };
 
   factory MeasurementResult.fromJson(Map<String, Object?> json) => MeasurementResult(
@@ -99,5 +105,6 @@ class MeasurementResult {
         executedLines: json['executedLines'] == null
             ? null
             : ExecutedLines.fromJson(json['executedLines'] as Map<String, Object?>),
+        flowCompleted: json['flowCompleted'] as bool?,
       );
 }

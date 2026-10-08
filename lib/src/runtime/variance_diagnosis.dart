@@ -45,8 +45,7 @@ class RunComparison {
 
 /// Whether repeated captures look like they exercised the app the same
 /// way each time -- the closest thing to a "flow determinism" signal
-/// available without any scripted-interaction flow to actually hold
-/// constant (see [flowScriptingAvailable]).
+/// available -- assessed against whether a flow (`--flow`) drove the runs.
 class FlowDeterminismAssessment {
   final bool deterministic;
   final String explanation;
@@ -54,12 +53,6 @@ class FlowDeterminismAssessment {
   const FlowDeterminismAssessment({required this.deterministic, required this.explanation});
 }
 
-/// This version of the tool has no scripted-interaction flow at all --
-/// capture is a fixed-duration passive window after launch, not a
-/// repeatable script. Kept as a named constant so every place that needs
-/// to caveat "flow" behavior does so consistently, and so it's a one-line
-/// change (not a scattered assumption) the day flow scripting exists.
-const flowScriptingAvailable = false;
 
 /// Everything [diagnoseVariance] can say about *why* a multi-run
 /// measurement came back unstable -- built entirely from data the probe
@@ -141,7 +134,7 @@ VarianceDiagnosis? diagnoseVariance(MultiRunSummary summary) {
   ];
 
   final runComparison = _compareExtremeRuns(runs);
-  final flowDeterminism = _assessFlowDeterminism(contributors);
+  final flowDeterminism = _assessFlowDeterminism(contributors, flow: summary.flow);
   final overallStatus = summary.overBudgetPercent!.confidence;
 
   return VarianceDiagnosis(
@@ -155,6 +148,8 @@ VarianceDiagnosis? diagnoseVariance(MultiRunSummary summary) {
     recommendations: _buildRecommendations(
       status: overallStatus,
       environment: summary.environment,
+      flowDeterminism: flowDeterminism,
+      flow: summary.flow,
     ),
   );
 }
@@ -203,43 +198,59 @@ RunComparison _compareExtremeRuns(List<RunAnalysis> runs) {
   return RunComparison(lowest: lowest, highest: highest, summary: buffer.toString());
 }
 
-FlowDeterminismAssessment _assessFlowDeterminism(List<DimensionVariance> contributors) {
+FlowDeterminismAssessment _assessFlowDeterminism(
+  List<DimensionVariance> contributors, {
+  required String? flow,
+}) {
   final rebuildVariance =
       contributors.firstWhere((c) => c.label == 'Rebuild activity').stats;
+  final cov = (rebuildVariance.coefficientOfVariation * 100).toStringAsFixed(1);
 
-  if (!flowScriptingAvailable) {
+  if (flow != null) {
     if (rebuildVariance.isUnstable) {
       return FlowDeterminismAssessment(
         deterministic: false,
         explanation:
-            'Flow behavior is not deterministic. No scripted interaction flow exists in this '
-            'version of the tool -- capture is a fixed-duration passive window after launch, not '
-            'a repeatable script -- but rebuild activity varied substantially between runs '
-            '(CoV ${(rebuildVariance.coefficientOfVariation * 100).toStringAsFixed(1)}%) with no '
-            'flow to hold constant. This measurement should not be treated as reproducible until '
-            'a deterministic flow exists.',
+            'Flow behavior is not deterministic. Every run was driven by the flow $flow, yet '
+            'rebuild activity varied substantially between runs (CoV $cov%) -- the flow itself '
+            'does different work from run to run (e.g. it depends on timing, network, or random '
+            'data).',
       );
     }
-    return const FlowDeterminismAssessment(
+    return FlowDeterminismAssessment(
       deterministic: true,
       explanation:
-          'No scripted interaction flow exists in this version of the tool, so flow determinism '
-          'cannot be directly assessed -- but rebuild activity (the closest available proxy for '
-          '"did the app do the same thing each run") was consistent across runs, which is at '
-          'least not evidence against reproducibility.',
+          'Every run was driven by the flow $flow, and rebuild activity was consistent across '
+          'runs (CoV $cov%): the app did the same work each run, so differences in frame timing '
+          'come from the device or environment, not the app.',
     );
   }
-  // Unreachable while flowScriptingAvailable is false; kept for the day it
-  // exists, so this function's shape doesn't need to change.
+
+  if (rebuildVariance.isUnstable) {
+    return FlowDeterminismAssessment(
+      deterministic: false,
+      explanation:
+          'Flow behavior is not deterministic. No flow was used (--flow) -- capture was a '
+          'fixed-duration window after launch, not a repeatable script -- and rebuild activity '
+          'varied substantially between runs (CoV $cov%). This measurement should not be '
+          'treated as reproducible until a flow drives the runs.',
+    );
+  }
   return const FlowDeterminismAssessment(
     deterministic: true,
-    explanation: 'Flow scripting is available but no assessment was implemented for it yet.',
+    explanation:
+        'No flow was used (--flow), so flow determinism cannot be directly assessed -- but '
+        'rebuild activity (the closest available proxy for "did the app do the same thing each '
+        'run") was consistent across runs, which is at least not evidence against '
+        'reproducibility.',
   );
 }
 
 List<String> _buildRecommendations({
   required Confidence status,
   required EnvironmentMetadata? environment,
+  required FlowDeterminismAssessment flowDeterminism,
+  required String? flow,
 }) {
   if (status == Confidence.high) {
     return const [
@@ -255,7 +266,13 @@ List<String> _buildRecommendations({
       'no way to isolate environment noise from application behavior yet.',
     );
   }
-  recommendations.add('Run on a physical device and/or make the flow deterministic.');
+  recommendations.add(switch ((flow, flowDeterminism.deterministic)) {
+    (null, _) => 'Run on a physical device and/or drive each run with a repeatable flow (--flow).',
+    (_, true) => 'Run on a physical device: the flow already makes the app do the same work every '
+        'run, so the remaining variance is the environment.',
+    (_, false) => 'Make the flow deterministic: avoid steps that depend on timing, network, or '
+        'random data.',
+  });
   return recommendations;
 }
 

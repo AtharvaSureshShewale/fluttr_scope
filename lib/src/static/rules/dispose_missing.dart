@@ -69,7 +69,7 @@ Map<VariableDeclaration, String> _disposableFields(
   ClassDeclaration classNode,
 ) {
   final result = <VariableDeclaration, String>{};
-  for (final member in classNode.body.members) {
+  for (final member in classMembers(classNode)) {
     if (member is! FieldDeclaration) continue;
     // Not `.toSource()`: that includes generic args and the nullability
     // suffix (`StreamSubscription<int>?`), which would never match a plain
@@ -91,7 +91,7 @@ Map<VariableDeclaration, String> _disposableFields(
 /// `_focusNode = widget.focusNode ?? FocusNode()`.
 Set<String> _fieldsCreatedHere(ClassDeclaration classNode) {
   final names = <String>{};
-  for (final member in classNode.body.members) {
+  for (final member in classMembers(classNode)) {
     if (member is! FieldDeclaration) continue;
     for (final v in member.fields.variables) {
       final init = v.initializer;
@@ -145,7 +145,7 @@ class _AssignmentVisitor extends RecursiveAstVisitor<void> {
 /// Field name -> method name (`dispose`/`cancel`) invoked on it anywhere in
 /// the class's `dispose()` method body.
 Map<String, String> _disposedFieldNames(ClassDeclaration classNode) {
-  final disposeMethod = classNode.body.members
+  final disposeMethod = classMembers(classNode)
       .whereType<MethodDeclaration>()
       .where((m) => m.name.lexeme == 'dispose')
       .firstOrNull;

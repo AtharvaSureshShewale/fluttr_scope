@@ -1,9 +1,15 @@
 ## Unreleased
 
-- Upgraded to analyzer 12.1 (from 7.7): the newest that still runs on Dart
-  3.9 / Flutter 3.35, and also runs on current stable. Findings on seven real
-  apps are identical before and after. CI now tests Flutter 3.35.2 and the
-  latest stable.
+- Repeatable flows: `measure --flow` / `prioritize --flow` run an
+  `integration_test` file as the app, so every run does the same thing.
+  `package:fluttr_scope/flow.dart` marks where recording starts
+  (`waitForFluttrScope()`, which excludes app startup) and stops
+  (`fluttrScopeDone()`). Variance reports say whether a flow was used.
+- analyzer constraint is `^10.0.1`, so fluttr_scope installs as a dev
+  dependency in Flutter 3.35 apps (analyzer 10.0.2+ needs `meta` 1.18, which
+  Flutter 3.35 pins at 1.16); newer setups still get analyzer 10.2.
+- Upgraded to analyzer 10 (from 7.7), runs on Flutter 3.35 and current
+  stable. CI tests Flutter 3.35.2 and the latest stable.
 - `dispose_missing` only flags controllers the class creates itself, not
   ones handed in from elsewhere or never assigned.
 - `setstate_in_build` is now info: Flutter ignores a rebuild request made

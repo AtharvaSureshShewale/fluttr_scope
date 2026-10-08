@@ -45,6 +45,13 @@ class PrioritizeCommand extends Command<int> {
         help: 'Output format.',
       )
       ..addOption('out', help: 'Write the report to this file instead of stdout.')
+      ..addOption(
+        'flow',
+        help: 'An integration_test file that drives the app during each run '
+            '(e.g. integration_test/flow_test.dart), so every run does the same '
+            'thing. Recording starts when the flow is ready and stops when it '
+            'finishes; --seconds becomes the time limit. See README.',
+      )
       ..addFlag('all', negatable: false, help: 'Also list info-level findings.')
       ..addFlag(
         'dependency-audit',
@@ -83,6 +90,7 @@ class PrioritizeCommand extends Command<int> {
       onLaunchOutput:
           argResults!['verbose'] as bool ? (line) => stderr.writeln('  $line') : null,
       onRunStart: (i, total) => stderr.writeln('Run $i/$total...'),
+      flow: argResults!['flow'] as String?,
     );
     for (final invalid in summary.invalidRuns) {
       stderr.writeln('warning: run #${invalid.runIndex} invalid: ${invalid.reason}');
@@ -115,6 +123,7 @@ class PrioritizeCommand extends Command<int> {
           'device': device,
           'validRuns': summary.validRuns.length,
           'requestedRuns': runs,
+          if (summary.flow != null) 'flow': summary.flow,
           'findings': [for (final t in triaged) t.toJson()],
         }),
       _ => formatTriageReport(
@@ -126,6 +135,7 @@ class PrioritizeCommand extends Command<int> {
             captureDuration: seconds,
             warmup: warmup,
             overallConfidence: summary.overBudgetPercent?.confidence,
+            flow: summary.flow,
           ),
           showAll: argResults!['all'] as bool,
         ),

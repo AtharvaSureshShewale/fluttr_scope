@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The oldest Flutter this package supports (Dart 3.9, the newest SDK
-        # analyzer 12.1 runs on) and whatever stable is today.
+        # The oldest Flutter this package supports (3.35 / Dart 3.9) and
+        # whatever stable is today.
         flutter-version: ['3.35.2', '']
     name: test (Flutter ${{ matrix.flutter-version || 'latest stable' }})
     steps:
@@ -31,3 +31,12 @@ jobs:
       - run: dart analyze --fatal-infos
       - run: dart test
       - run: dart pub publish --dry-run
+
+      # The way users install it: as a dev dependency of a Flutter app, whose
+      # SDK pins versions (e.g. `meta`) that fluttr_scope's dependencies must
+      # accept. Testing the package on its own never catches a clash there.
+      - name: Install into a fresh Flutter app
+        run: |
+          flutter create --project-name ci_app "$RUNNER_TEMP/ci_app"
+          cd "$RUNNER_TEMP/ci_app"
+          flutter pub add --dev fluttr_scope --path "$GITHUB_WORKSPACE"

@@ -9,6 +9,26 @@ void main() {
       accumulator = FrameRebuildAccumulator(root: '/project');
     });
 
+    test('resetRecords forgets frames so far but keeps locations sent before it', () {
+      accumulator.addEvent({
+        'frameNumber': 1,
+        'events': [1, 3],
+        'locations': {
+          '/project/lib/foo.dart': {
+            'ids': [1],
+            'lines': [10],
+            'columns': [5],
+          },
+        },
+      });
+      accumulator.resetRecords();
+      expect(accumulator.records, isEmpty);
+
+      accumulator.addEvent({'frameNumber': 2, 'events': [1, 4]});
+      expect(accumulator.records.single.frameNumber, 2);
+      expect(accumulator.records.single.countsByLocation.keys.single.line, 10);
+    });
+
     test('decodes one location and count for a given frame number', () {
       accumulator.addEvent({
         'frameNumber': 42,
