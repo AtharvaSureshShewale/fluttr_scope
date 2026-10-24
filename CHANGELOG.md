@@ -1,9 +1,3 @@
-## Unreleased
-
-- **Breaking for custom rules:** `StaticRule` has a new `category` getter
-  that every rule must implement (e.g. `Category get category =>
-  Category.style;`). The built-in rules all declare theirs.
-
 ## 0.2.0
 
 First release on pub.dev. Includes everything in 0.1.0 (tagged in git,
@@ -32,6 +26,9 @@ never published) plus:
   device) as soon as `flutter run` exits, with its last lines of output,
   instead of waiting for the timeout and printing a stack trace; multi-run
   stops after the first failed launch.
+- **Breaking for custom rules:** `StaticRule` has a new `category` getter
+  that every rule must implement (e.g. `Category get category =>
+  Category.style;`). The built-in rules all declare theirs.
 
 ## 0.1.0 (git tag only)
 
