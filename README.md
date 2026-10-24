@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/analyze-wonderous.svg" alt="fluttr_scope finding a hardcoded secret, a memory leak, a setState-after-await and a FutureBuilder restarting on every rebuild in the Wonderous app" width="900">
+  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/dashboard.svg" alt="fluttr_scope dashboard: 47 Dart rules plus 3 file checks, 5 commands, 371 tests passing, CI green on Flutter 3.35.2 and stable, rules by category, findings on Wonderous and Spotube, verification scores and roadmap" width="960">
 </p>
 
 ## Why
@@ -57,6 +57,10 @@ Step 4 needs a running emulator or connected phone. Prefer a global install?
 
 Everything below was found in public, well-known apps and **checked by hand
 against the code**. Click through to the exact line.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/analyze-wonderous.svg" alt="fluttr_scope finding a hardcoded secret, a memory leak, a setState-after-await and a FutureBuilder restarting on every rebuild in the Wonderous app" width="900">
+</p>
 
 | App | Finding | Why it matters |
 |---|---|---|
