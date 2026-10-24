@@ -1,15 +1,23 @@
-## Unreleased
+## 0.2.0
 
-- Repeatable flows: `measure --flow` / `prioritize --flow` run an
+First release on pub.dev. Includes everything in 0.1.0 (tagged in git,
+never published) plus:
+
+- **Repeatable flows**: `measure --flow` / `prioritize --flow` run an
   `integration_test` file as the app, so every run does the same thing.
   `package:fluttr_scope/flow.dart` marks where recording starts
   (`waitForFluttrScope()`, which excludes app startup) and stops
   (`fluttrScopeDone()`). Variance reports say whether a flow was used.
-- analyzer constraint is `^10.0.1`, so fluttr_scope installs as a dev
-  dependency in Flutter 3.35 apps (analyzer 10.0.2+ needs `meta` 1.18, which
-  Flutter 3.35 pins at 1.16); newer setups still get analyzer 10.2.
-- Upgraded to analyzer 10 (from 7.7), runs on Flutter 3.35 and current
-  stable. CI tests Flutter 3.35.2 and the latest stable.
+- **Riverpod**: rules that check widget `build` methods
+  (`future_created_in_build`, `key_created_in_build`,
+  `deeply_nested_widget_tree`, `setstate_in_build`) now also cover
+  `build(BuildContext context, WidgetRef ref)`.
+- **analyzer 10** (from 7.7). The constraint is `^10.0.1`, so fluttr_scope
+  installs as a dev dependency in Flutter 3.35 apps (analyzer 10.0.2+ needs
+  `meta` 1.18, which Flutter 3.35 pins at 1.16), and newer setups get 10.2.
+  Findings on eight real apps are identical before and after. CI tests
+  Flutter 3.35.2 and the latest stable, including installing the package
+  into a fresh Flutter app.
 - `dispose_missing` only flags controllers the class creates itself, not
   ones handed in from elsewhere or never assigned.
 - `setstate_in_build` is now info: Flutter ignores a rebuild request made
@@ -18,11 +26,8 @@
   device) as soon as `flutter run` exits, with its last lines of output,
   instead of waiting for the timeout and printing a stack trace; multi-run
   stops after the first failed launch.
-- Rules that check widget `build` methods (`future_created_in_build`,
-  `key_created_in_build`, `deeply_nested_widget_tree`, `setstate_in_build`)
-  now also cover Riverpod's `build(BuildContext context, WidgetRef ref)`.
 
-## 0.1.0
+## 0.1.0 (git tag only)
 
 First public release.
 

@@ -165,7 +165,7 @@ Add the two packages it needs:
 dev_dependencies:
   integration_test:
     sdk: flutter
-  fluttr_scope: ^0.1.0
+  fluttr_scope: ^0.2.0
 ```
 
 Then mark where the measured session starts and ends:

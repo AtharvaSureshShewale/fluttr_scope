@@ -3,7 +3,7 @@ description: >-
   Flutter-aware static analysis (performance, correctness, security,
   accessibility) with runtime rebuild and frame-timing evidence joined to
   the exact source line.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/AtharvaSureshShewale/fluttr_scope
 issue_tracker: https://github.com/AtharvaSureshShewale/fluttr_scope/issues
 topics:
