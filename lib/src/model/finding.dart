@@ -40,6 +40,14 @@ class Finding {
   final List<Evidence> evidence;
   final Fix? fix;
 
+  /// Where to look for runtime rebuild evidence when [location] itself has
+  /// none -- because nothing there rebuilds in Flutter's tracking: a
+  /// low-level widget like `Opacity` or `Padding` (only widgets with a
+  /// `build` are reported), a key or future created inline, a `setState`
+  /// call. These are the widgets whose rebuilds re-run this code, e.g. the
+  /// widgets it sits inside. Not part of the report formats.
+  final List<SourceLocation> evidenceLocations;
+
   const Finding({
     required this.ruleId,
     required this.category,
@@ -49,6 +57,7 @@ class Finding {
     this.widgetPath,
     this.evidence = const [],
     this.fix,
+    this.evidenceLocations = const [],
   });
 
   Finding copyWith({Severity? severity, List<Evidence>? evidence}) => Finding(
@@ -60,6 +69,7 @@ class Finding {
         widgetPath: widgetPath,
         evidence: evidence ?? this.evidence,
         fix: fix,
+        evidenceLocations: evidenceLocations,
       );
 
   Map<String, Object?> toJson() => {
@@ -72,4 +82,20 @@ class Finding {
         'evidence': evidence.map((e) => e.toJson()).toList(),
         if (fix != null) 'fix': fix!.toJson(),
       };
+}
+
+extension RuntimeRecordLookup on Finding {
+  /// The runtime record for this finding in [byLocation]: the one at its
+  /// [Finding.location], or failing that the strongest (by [compare]) at
+  /// any of its [Finding.evidenceLocations].
+  T? recordIn<T>(Map<SourceLocation, T> byLocation, int Function(T a, T b) compare) {
+    final own = byLocation[location];
+    if (own != null) return own;
+    T? best;
+    for (final at in evidenceLocations) {
+      final record = byLocation[at];
+      if (record != null && (best == null || compare(record, best) > 0)) best = record;
+    }
+    return best;
+  }
 }

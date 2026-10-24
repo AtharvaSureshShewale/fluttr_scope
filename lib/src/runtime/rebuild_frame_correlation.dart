@@ -192,6 +192,13 @@ class RebuildFrameCorrelationResult {
   });
 }
 
+/// Orders impacts by how strongly they point at a performance problem:
+/// more slow frames first, then more rebuilds.
+int compareImpactStrength(WidgetFrameImpactSummary a, WidgetFrameImpactSummary b) {
+  final bySlow = a.overBudgetFrameCountStats.median.compareTo(b.overBudgetFrameCountStats.median);
+  return bySlow != 0 ? bySlow : a.rebuildCountStats.median.compareTo(b.rebuildCountStats.median);
+}
+
 /// Joins [staticFindings] to [widgetImpacts] by exact source location --
 /// the same join key every other correlation in this package uses.
 /// [staticFindings] is typically pre-filtered by the caller (e.g. to
@@ -208,10 +215,10 @@ RebuildFrameCorrelationResult correlateRebuildsToFrames(
   final matched = <MatchedFinding>[];
   final notExercised = <NotExercisedFinding>[];
   for (final finding in staticFindings) {
-    final impact = byLocation[finding.location];
+    final impact = finding.recordIn(byLocation, compareImpactStrength);
     if (impact != null) {
       matched.add(MatchedFinding(finding: finding, impact: impact));
-      matchedLocations.add(finding.location);
+      matchedLocations.add(impact.location);
     } else {
       notExercised.add(NotExercisedFinding(finding: finding));
     }

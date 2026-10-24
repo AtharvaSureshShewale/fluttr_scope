@@ -277,6 +277,26 @@ void main() {
       ],
     );
 
+    test('points runtime evidence at the widgets that re-run the code', () {
+      const file = 'animation_rebuild_examples.dart';
+      final (columnLine, columnCol) = locate('return Column(', relativeFile: file, columnOf: 'Column');
+      bool hasColumn(Finding f) => f.evidenceLocations
+          .any((l) => l.line == columnLine && l.column == columnCol);
+
+      // Opacity is updated in place, never reported as rebuilt: its
+      // evidence is the Column it sits in.
+      final (opacityLine, _) = locate('bad controller value', relativeFile: file);
+      final opacity = inFile('opacity_in_animation', file).singleWhere((f) => f.location.line == opacityLine);
+      expect(hasColumn(opacity), isTrue);
+
+      // The listener's setState re-runs the class's build, which creates
+      // the Column.
+      final (listenerLine, _) = locate('bad closure listener', relativeFile: file);
+      final listener =
+          inFile('setstate_in_animation_listener', file).singleWhere((f) => f.location.line == listenerLine);
+      expect(hasColumn(listener), isTrue);
+    });
+
     test('suggests the narrowest lookup', () {
       final messages = inFile('media_query_of_single_property', 'animation_rebuild_examples.dart')
           .map((f) => f.message)
@@ -491,6 +511,14 @@ void main() {
     );
     expect(matches.single.location.line, line);
     expect(matches.single.location.column, column);
+  });
+
+  test('a named constructor with type arguments is reported at its type', () {
+    // Flutter's tracking reports `Provider<T>.value(...)` at `Provider`,
+    // not at `value` as it does for `Image.asset(...)` (Wonderous).
+    final (line, column) = locate('Radio<int>.adaptive(', relativeFile: 'join_key_examples.dart');
+    final finding = inFile('missing_const_constructor', 'join_key_examples.dart').single;
+    expect((finding.location.line, finding.location.column), (line, column));
   });
 
   test('image_network_without_error_builder flags Image.network without errorBuilder', () {

@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:path/path.dart' as p;
 
 import '../model/category.dart';
@@ -52,10 +53,14 @@ SourceLocation locationOf(
 /// tracking uses for the locations it reports at runtime -- so a finding on
 /// a widget and that widget's rebuild data share the exact file:line:column
 /// join key. For a constructor call that's the constructor name: `asset`
-/// in `Image.asset(...)`, `Text` in `const Text(...)` (no keyword).
+/// in `Image.asset(...)`, `Text` in `const Text(...)` (no keyword) -- but
+/// the type when it has type arguments: `Provider` in
+/// `Provider<T>.value(...)` (both seen on Wonderous's rebuild data).
 int _joinOffset(AstNode node) => switch (node) {
-      InstanceCreationExpression(:final constructorName) =>
+      InstanceCreationExpression(:final constructorName)
+          when constructorName.type.typeArguments == null =>
         constructorName.name?.offset ?? constructorName.offset,
+      InstanceCreationExpression(:final constructorName) => constructorName.offset,
       _ => node.offset,
     };
 
@@ -110,4 +115,53 @@ bool isTestFile(ResolvedUnitResult unit, RuleContext context) {
   return path.startsWith('test/') ||
       path.startsWith('integration_test/') ||
       path.endsWith('_test.dart');
+}
+
+/// [Finding.evidenceLocations] for code at [node] that Flutter's rebuild
+/// tracking can't see directly: the constructor calls [node] is nested
+/// inside, out to its enclosing function -- whenever one of those widgets
+/// is rebuilt, this code ran again. When there are none (a local variable
+/// at the top of `build`), the constructor calls of that function body.
+List<SourceLocation> rerunEvidence(
+  ResolvedUnitResult unit,
+  AstNode node,
+  RuleContext context,
+) {
+  final enclosing = [
+    for (var n = node.parent; n != null && n is! FunctionBody; n = n.parent)
+      if (n is InstanceCreationExpression) locationOf(unit, n, context),
+  ];
+  if (enclosing.isNotEmpty) return enclosing;
+  final body = node.thisOrAncestorOfType<FunctionBody>();
+  return body == null ? const [] : creationsIn(unit, body, context);
+}
+
+/// The locations of the constructor calls [body] runs every time it runs:
+/// its own, not those in closures nested inside it.
+List<SourceLocation> creationsIn(
+  ResolvedUnitResult unit,
+  FunctionBody body,
+  RuleContext context,
+) {
+  final locations = <SourceLocation>[];
+  body.accept(_CreationCollector(body, (node) => locations.add(locationOf(unit, node, context))));
+  return locations;
+}
+
+class _CreationCollector extends RecursiveAstVisitor<void> {
+  final FunctionBody root;
+  final void Function(InstanceCreationExpression node) onCreation;
+
+  _CreationCollector(this.root, this.onCreation);
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    onCreation(node);
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitFunctionExpression(FunctionExpression node) {
+    if (node.body == root) super.visitFunctionExpression(node);
+  }
 }

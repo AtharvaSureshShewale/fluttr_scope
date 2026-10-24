@@ -34,6 +34,7 @@ class KeyCreatedInBuildRule extends StaticRule {
               'runs; move it to a field so it stays stable across '
               'rebuilds.',
           location: locationOf(unit, node, context),
+          evidenceLocations: rerunEvidence(unit, node, context),
         ));
       }));
     }));

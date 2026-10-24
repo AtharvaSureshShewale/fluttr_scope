@@ -179,6 +179,11 @@ Map<String, Object?>? _statsToJson(Stats? stats) {
   };
 }
 
+/// Why a run whose flow hit the [limit] doesn't count.
+String flowTimeoutReason(Duration limit) =>
+    "the flow didn't finish within ${limit.inSeconds}s, so this run measured only part "
+    'of it -- raise --seconds above the time the flow takes';
+
 /// Runs `RuntimeDriver().measure()` [runs] times, sequentially -- each a
 /// full launch/relaunch/shutdown cycle, matching the existing single-run
 /// behavior exactly for each individual attempt (this does not change
@@ -188,9 +193,10 @@ Map<String, Object?>? _statsToJson(Stats? stats) {
 ///
 /// A run that throws (launch failure, VM Service connection failure,
 /// the rebuild-tracking extension never registering) or that captures
-/// fewer than [minSteadyStateFramesPerRun] steady-state frames is recorded
-/// as an [InvalidRun] with the reason, and the remaining runs still
-/// proceed -- one flaky launch shouldn't discard every other run.
+/// fewer than [minSteadyStateFramesPerRun] steady-state frames, or whose
+/// [flow] didn't finish within [duration], is recorded as an [InvalidRun]
+/// with the reason, and the remaining runs still proceed -- one flaky
+/// launch shouldn't discard every other run.
 Future<MultiRunSummary> measureMultipleRuns({
   required String targetPath,
   required int runs,
@@ -223,6 +229,15 @@ Future<MultiRunSummary> measureMultipleRuns({
       // run too idle for frame statistics still contributes coverage.
       if (result.executedLines case final lines?) {
         executedLines = executedLines?.merge(lines) ?? lines;
+      }
+      // A run cut off by the time limit measured only part of the flow, so
+      // its numbers can't be compared with runs that did all of it.
+      if (result.flowCompleted == false) {
+        invalidRuns.add(InvalidRun(
+          runIndex: i,
+          reason: flowTimeoutReason(duration),
+        ));
+        continue;
       }
       final capture = splitByWarmup(result.frames, warmup);
       if (capture.steadyState.length < minSteadyStateFramesPerRun) {

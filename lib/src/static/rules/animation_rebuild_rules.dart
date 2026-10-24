@@ -70,6 +70,7 @@ class MediaQueryOfSinglePropertyRule extends StaticRule {
             '`MediaQuery.$replacement(context)` reads the same value and rebuilds only '
             'when it changes.',
         location: locationOf(unit, node, context),
+        evidenceLocations: rerunEvidence(unit, node, context),
       ));
     }));
     return findings;
@@ -156,6 +157,11 @@ class SetStateInAnimationListenerRule extends StaticRule {
             '`CustomPainter` the animation as `repaint:`.',
         location: locationOfToken(unit, addListener.methodName.token, context,
             end: addListener.end),
+        // The setState re-runs this class's build on every frame.
+        evidenceLocations: [
+          if (_buildBodyOfClassOf(addListener) case final body?)
+            ...creationsIn(unit, body, context),
+        ],
       ));
     }));
     return findings;
@@ -192,6 +198,15 @@ class _AnimationListenerVisitor extends RecursiveAstVisitor<void> {
     }
     return null;
   }
+}
+
+FunctionBody? _buildBodyOfClassOf(AstNode node) {
+  final classNode = node.thisOrAncestorOfType<ClassDeclaration>();
+  if (classNode == null) return null;
+  for (final member in classMembers(classNode)) {
+    if (member is MethodDeclaration && isWidgetBuildMethod(member)) return member.body;
+  }
+  return null;
 }
 
 bool _callsSetStateUnconditionally(FunctionBody body) {
@@ -273,6 +288,7 @@ class OpacityInAnimationRule extends StaticRule {
             'frame. `FadeTransition(opacity: animation, ...)` fades it without rebuilding '
             '(use a `Tween` or `ReverseAnimation` for anything other than the raw value).',
         location: locationOf(unit, node, context),
+        evidenceLocations: rerunEvidence(unit, node, context),
       ));
     }));
     return findings;

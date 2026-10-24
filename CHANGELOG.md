@@ -9,6 +9,18 @@
   - `media_query_of_single_property`: `MediaQuery.of(context).size` and
     friends, which rebuild on any MediaQuery change (use
     `MediaQuery.sizeOf(context)`, `widthOf`, `paddingOf`, ...).
+- **Runtime evidence for code Flutter doesn't track.** Flutter only
+  reports rebuilds of widgets with a `build` method, so a finding on an
+  `Opacity`, `Padding` or `SizedBox`, an inline `GlobalKey` or future, or a
+  `setState` call never had rebuild data and could never rank as fix-first.
+  These findings now take their evidence from the widgets that re-run the
+  code (the report names which). Found on Wonderous: an `Opacity` whose
+  parent rebuilt 4,611 times showed nothing.
+- **Fix:** a named constructor with type arguments (`Provider<T>.value(...)`)
+  is matched to its rebuild data at the type, where Flutter reports it.
+- **Fix:** with `--flow`, a run that hits the `--seconds` limit before the
+  flow finishes no longer counts (it measured only part of the flow); the
+  report says to raise `--seconds`. `measure --runs 1` warns instead.
 
 ## 0.2.0
 

@@ -198,6 +198,11 @@ String formatDeveloperFinding(UnifiedFinding f) {
   buffer.writeln(titleFor(f));
   buffer.writeln();
   buffer.writeln('📍 ${f.location}');
+  // Evidence from another location (see Finding.evidenceLocations): the
+  // numbers below are that widget's, so name it.
+  if (f.impact case final impact? when impact.location != f.location) {
+    buffer.writeln('   Rebuild data from ${impact.location}, the widget that re-runs this code.');
+  }
   buffer.writeln();
 
   if (f.relation == FindingRelation.notExercised) {

@@ -91,6 +91,61 @@ void main() {
       ]);
     });
 
+    group('evidence locations', () {
+      // Found on Wonderous: `Opacity(opacity: _anim.value)` inside a
+      // `Positioned` that rebuilt 1470 times had no rebuild data of its own
+      // -- Flutter only reports rebuilds of widgets with a build method.
+      Finding withEvidence(int line, List<int> evidenceLines) => Finding(
+            ruleId: 'opacity_in_animation',
+            category: Category.performance,
+            severity: Severity.info,
+            message: 'm',
+            location: SourceLocation(file: 'lib/a.dart', line: line, column: 1, length: 1),
+            evidenceLocations: [
+              for (final l in evidenceLines)
+                SourceLocation(file: 'lib/a.dart', line: l, column: 1, length: 0),
+            ],
+          );
+      SourceLocation at(int line) => SourceLocation(file: 'lib/a.dart', line: line, column: 1, length: 0);
+
+      test('with nothing at its own location, takes the strongest evidence location', () {
+        final finding = withEvidence(86, [83, 80]);
+        final result = triage([finding], impacts: [
+          _impact(at(80), rebuilds: 2000, overBudget: 1),
+          _impact(at(83), rebuilds: 1470, overBudget: 8),
+        ]);
+        expect(result.single.evidence, RuntimeEvidence.hot);
+        expect(result.single.impact!.location, at(83)); // more slow frames wins
+      });
+
+      test('its own location wins when it has data', () {
+        final finding = withEvidence(86, [83]);
+        final result = triage([finding], impacts: [
+          _impact(at(86), rebuilds: 10, overBudget: 0),
+          _impact(at(83), rebuilds: 1470, overBudget: 8),
+        ]);
+        expect(result.single.evidence, RuntimeEvidence.ran);
+        expect(result.single.impact!.location, at(86));
+      });
+
+      test('the report names the widget the numbers came from', () {
+        final finding = withEvidence(86, [83]);
+        final triaged = triage([finding], impacts: [_impact(at(83), rebuilds: 1470, overBudget: 8)]);
+        final report = formatTriageReport(
+          triaged,
+          const TriageContext(
+            device: 'd',
+            validRuns: 3,
+            requestedRuns: 3,
+            captureDuration: Duration(seconds: 60),
+            warmup: Duration.zero,
+            overallConfidence: null,
+          ),
+        );
+        expect(report, contains('The widget at line 83, which re-runs this code, rebuilt 1470x'));
+      });
+    });
+
     test('only a performance finding can be hot -- slow frames say nothing about others', () {
       // Found on a real app: images missing a semantic label were ranked
       // hot because they were on screen while scrolling was slow.

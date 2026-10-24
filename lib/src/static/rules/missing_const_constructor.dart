@@ -39,6 +39,7 @@ class MissingConstConstructorRule extends StaticRule {
             'This widget could be `const`, which would let Flutter skip '
             'rebuilding it when its parent rebuilds.',
         location: locationOf(unit, node, context),
+        evidenceLocations: rerunEvidence(unit, node, context),
       ));
     }));
     return findings;

@@ -103,11 +103,13 @@ class MeasureCommand extends Command<int> {
     final runs = int.parse(argResults!['runs'] as String);
     final onLaunchOutput = verbose ? (String line) => stderr.writeln('  $line') : null;
 
+    final flow = argResults!['flow'] as String?;
     if (runs <= 1) {
       // Unchanged from before --runs existed: exactly the original
       // single-run path, reachable via --runs=1.
       stderr.writeln(
-        'Launching on $device (debug mode) and capturing rebuilds for ${seconds}s...',
+        'Launching on $device (debug mode) and capturing rebuilds '
+        '${flow == null ? 'for ${seconds}s' : 'until the flow finishes (at most ${seconds}s)'}...',
       );
 
       final MeasurementResult result;
@@ -117,11 +119,14 @@ class MeasureCommand extends Command<int> {
           duration: Duration(seconds: seconds),
           device: device,
           onLaunchOutput: onLaunchOutput,
-          flow: argResults!['flow'] as String?,
+          flow: flow,
         );
       } on AppLaunchException catch (e) {
         stderr.writeln(e.describe());
         return 1;
+      }
+      if (result.flowCompleted == false) {
+        stderr.writeln('Warning: ${flowTimeoutReason(Duration(seconds: seconds))}.');
       }
       result.rebuilds.sort((a, b) => b.rebuildCount.compareTo(a.rebuildCount));
       result.frames.sort((a, b) => a.frameNumber.compareTo(b.frameNumber));
@@ -146,7 +151,7 @@ class MeasureCommand extends Command<int> {
       device: device,
       onLaunchOutput: onLaunchOutput,
       onRunStart: (i, total) => stderr.writeln('Run $i/$total...'),
-      flow: argResults!['flow'] as String?,
+      flow: flow,
     );
 
     final diagnosis = diagnoseVariance(summary);

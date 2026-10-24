@@ -33,8 +33,9 @@ class Correlator {
 
     final correlated = [
       for (final finding in findings)
-        if (byLocation[finding.location] case final record?)
-          _withEvidence(finding, record, onMatch: () => matchedLocations.add(finding.location))
+        if (finding.recordIn(byLocation, (a, b) => a.rebuildCount.compareTo(b.rebuildCount))
+            case final record?)
+          _withEvidence(finding, record, onMatch: () => matchedLocations.add(record.location))
         else
           finding,
     ];
@@ -53,15 +54,6 @@ class Correlator {
     required void Function() onMatch,
   }) {
     onMatch();
-    return Finding(
-      ruleId: finding.ruleId,
-      category: finding.category,
-      severity: finding.severity,
-      message: finding.message,
-      location: finding.location,
-      widgetPath: finding.widgetPath,
-      evidence: [Evidence(rebuildCount: record.rebuildCount)],
-      fix: finding.fix,
-    );
+    return finding.copyWith(evidence: [Evidence(rebuildCount: record.rebuildCount)]);
   }
 }

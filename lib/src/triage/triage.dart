@@ -28,7 +28,9 @@ class TriagedFinding {
   final RuntimeEvidence evidence;
 
   /// Rebuild/frame evidence at this exact location, if the widget there
-  /// rebuilt at all.
+  /// rebuilt at all -- or at one of [Finding.evidenceLocations] when nothing
+  /// at the finding's own location is tracked ([WidgetFrameImpactSummary.location]
+  /// says which).
   final WidgetFrameImpactSummary? impact;
 
   const TriagedFinding({required this.finding, required this.evidence, this.impact});
@@ -57,7 +59,7 @@ List<TriagedFinding> triageFindings(
   final impactByLocation = {for (final i in impacts) i.location: i};
   final triaged = [
     for (final f in findings)
-      _triage(f, impactByLocation[f.location], executedLines, sourceLines),
+      _triage(f, f.recordIn(impactByLocation, compareImpactStrength), executedLines, sourceLines),
   ];
   triaged.sort(_byPriority);
   return triaged;

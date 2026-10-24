@@ -91,6 +91,7 @@ class FutureCreatedInBuildRule extends StaticRule {
                 '`build()`, so it restarts on every rebuild. Store it in '
                 'a field (e.g. set in `initState`) instead.',
             location: locationOf(unit, node, context),
+            evidenceLocations: rerunEvidence(unit, node, context),
           ));
         }));
       }
