@@ -111,6 +111,16 @@ bool isFrameworkWidget(InstanceCreationExpression creation) {
       type.element.library.uri.toString().startsWith('package:flutter/');
 }
 
+/// Whether [type] is Flutter's `Animation` or a subtype of it
+/// (`AnimationController`, `CurvedAnimation`, ...) -- something that
+/// notifies its listeners on every frame while it runs.
+bool isFlutterAnimation(DartType? type) {
+  if (type is! InterfaceType) return false;
+  return [type, ...type.allSupertypes].any((t) =>
+      t.element.name == 'Animation' &&
+      t.element.library.uri.toString().startsWith('package:flutter/'));
+}
+
 /// Whether [node]'s nearest enclosing function literal, walking up toward
 /// [root], is something other than [root] itself — i.e. [node] sits inside
 /// a nested closure/local function declared within [root], rather than

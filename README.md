@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Every other Flutter analyzer reads your code. This one runs it.</b><br>
-  47 Flutter-specific checks, plus measured widget rebuilds and frame timing,<br>
+  50 Flutter-specific checks, plus measured widget rebuilds and frame timing,<br>
   joined to the exact line of code that caused the finding.
 </p>
 
@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/dashboard.svg" alt="fluttr_scope dashboard: 47 Dart rules plus 3 file checks, 5 commands, 371 tests passing, CI green on Flutter 3.35.2 and stable, rules by category, findings on Wonderous and Spotube, verification scores and roadmap" width="960">
+  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/dashboard.svg" alt="fluttr_scope dashboard: rule and test counts, CI status, rules by category, findings on Wonderous and Spotube, verification scores and roadmap" width="960">
 </p>
 
 ## Why
@@ -34,7 +34,7 @@ app. fluttr_scope does both:
 
 | | `flutter analyze` | Flutter DevTools | **fluttr_scope** |
 |---|:---:|:---:|:---:|
-| Flutter-specific checks (layout, lifecycle, rebuilds) | Dart lints | | ✅ 47 rules |
+| Flutter-specific checks (layout, lifecycle, rebuilds) | Dart lints | | ✅ 50 rules |
 | Security: secrets, manifests, known CVEs | | | ✅ |
 | Measures rebuilds and frame timing | | ✅ by hand | ✅ scripted, repeatable |
 | Attaches runtime evidence to the finding's line | | | ✅ |
@@ -45,7 +45,7 @@ app. fluttr_scope does both:
 
 ```sh
 flutter pub add --dev fluttr_scope        # 1. add it to your app (dev only, never shipped)
-dart run fluttr_scope analyze             # 2. 47 Flutter checks
+dart run fluttr_scope analyze             # 2. 50 Flutter checks
 dart run fluttr_scope security            # 3. secrets, manifests, CVEs: one verdict
 dart run fluttr_scope prioritize          # 4. run the app: what to fix first
 ```
@@ -106,7 +106,7 @@ committed code): `bottom_navigation_bar_too_few_items`,
 ## How it works
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/how-it-works.svg" alt="Your code goes through 47 Flutter rules; your running app goes through the Dart VM service; both are joined on the exact source line into a ranked report" width="900">
+  <img src="https://raw.githubusercontent.com/AtharvaSureshShewale/fluttr_scope/main/doc/images/how-it-works.svg" alt="Your code goes through 50 Flutter rules; your running app goes through the Dart VM service; both are joined on the exact source line into a ranked report" width="900">
 </p>
 
 The static side is a normal analyzer. The runtime side launches your app in
@@ -128,7 +128,7 @@ noise, as in the run above. See [Repeatable flows](#repeatable-flows).
 Click a command to see its options.
 
 <details>
-<summary><code>analyze</code>: run the 47 static checks</summary>
+<summary><code>analyze</code>: run the 50 static checks</summary>
 
 <br>
 
@@ -422,13 +422,13 @@ Findings then show up as annotations on pull requests.
 
 ## Rules
 
-47 rules check your Dart code; 3 more check `AndroidManifest.xml`,
+50 rules check your Dart code; 3 more check `AndroidManifest.xml`,
 `Info.plist` and `pubspec.lock` (marked † below). Click a category to see
 its rules. Ids in **bold** are the ones runtime evidence attaches to most
 directly.
 
 <details>
-<summary><b>Performance</b> · 8 rules</summary>
+<summary><b>Performance</b> · 11 rules</summary>
 
 <br>
 
@@ -442,6 +442,9 @@ directly.
 | `shrinkwrap_listview` | info | `shrinkWrap: true` on a scrollable |
 | `empty_container_instead_of_sizedbox` | info | An empty `Container()` used for spacing |
 | **`widget_returning_method`** | info | A method on a widget / `State` returning `Widget` instead of a widget class |
+| **`setstate_in_animation_listener`** | warning | `setState` in an animation's listener, which rebuilds the whole widget on every frame |
+| **`opacity_in_animation`** | info | `Opacity(opacity: animation.value)`, which rebuilds its child every frame; `FadeTransition` doesn't |
+| `media_query_of_single_property` | info | `MediaQuery.of(context).size` (or `.padding`, ...), which rebuilds on any MediaQuery change; `MediaQuery.sizeOf(context)` doesn't |
 
 </details>
 

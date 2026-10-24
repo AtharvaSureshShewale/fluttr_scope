@@ -267,6 +267,26 @@ void main() {
     labelledFixtureTests('secret_real_world_examples.dart', ['hardcoded_secret']);
   });
 
+  group('animation rebuild rules (animation_rebuild_examples.dart)', () {
+    labelledFixtureTests(
+      'animation_rebuild_examples.dart',
+      [
+        'media_query_of_single_property',
+        'setstate_in_animation_listener',
+        'opacity_in_animation',
+      ],
+    );
+
+    test('suggests the narrowest lookup', () {
+      final messages = inFile('media_query_of_single_property', 'animation_rebuild_examples.dart')
+          .map((f) => f.message)
+          .join('\n');
+      expect(messages, contains('`MediaQuery.widthOf(context)`'));
+      expect(messages, contains('`MediaQuery.maybeSizeOf(context)`'));
+      expect(messages, contains('`MediaQuery.viewInsetsOf(context)`'));
+    });
+  });
+
   group('build-method rules on Riverpod build(context, ref) (riverpod_build_examples.dart)', () {
     labelledFixtureTests(
       'riverpod_build_examples.dart',

@@ -1,3 +1,15 @@
+## Unreleased
+
+- **3 new performance rules**, each checked by hand on real apps
+  (Wonderous, Spotube and 4 others: 139 findings, no false alarms):
+  - `setstate_in_animation_listener`: `setState` in an `Animation`'s
+    listener, rebuilding the whole widget on every frame;
+  - `opacity_in_animation`: `Opacity` driven by an animation's `.value`
+    (use `FadeTransition`);
+  - `media_query_of_single_property`: `MediaQuery.of(context).size` and
+    friends, which rebuild on any MediaQuery change (use
+    `MediaQuery.sizeOf(context)`, `widthOf`, `paddingOf`, ...).
+
 ## 0.2.0
 
 First release on pub.dev. Includes everything in 0.1.0 (tagged in git,

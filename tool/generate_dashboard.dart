@@ -15,7 +15,14 @@ import 'package:fluttr_scope/fluttr_scope.dart';
 const outputPath = 'doc/images/dashboard.svg';
 
 /// Rules seen firing on a real app, out of all Dart rules.
-const rulesSeenLive = 34;
+const rulesSeenLive = 37;
+
+/// `fluttr_scope analyze` on real apps (Wonderous at ff1ab1b8, Spotube at
+/// 69a310c7): errors, warnings, infos.
+const realAppFindings = [
+  ('Wonderous', 2, 88, 93),
+  ('Spotube', 0, 96, 57),
+];
 
 /// The bars, in the order they're drawn.
 const barCategories = [
@@ -86,6 +93,25 @@ String dashboard({required int passed, required int total}) {
     return '$out';
   }
 
+  // One stacked bar per app, 1.4px per finding, errors first.
+  String findingBars() {
+    final out = StringBuffer();
+    for (final (i, (app, errors, warnings, infos)) in realAppFindings.indexed) {
+      final y = 413 + 28 * i;
+      out.writeln('      <text x="300" y="${y + 11}" fill="#c9d1d9">$app</text>');
+      var x = 378.0;
+      for (final (count, color) in [(errors, '#f85149'), (warnings, '#d29922'), (infos, '#8b949e')]) {
+        if (count == 0) continue;
+        final width = count * 1.4;
+        out.writeln('      <rect x="${_number(x)}" y="$y" width="${_number(width)}" height="14" fill="$color"/>');
+        x += width;
+      }
+      out.writeln('      <text x="${(x + 9).round()}" y="${y + 11}" fill="#e6edf3" '
+          'font-weight="600">${errors + warnings + infos}</text>');
+    }
+    return '$out';
+  }
+
   // A ring's filled arc, out of a circumference of 188.5 (r=30).
   String dash(double fraction) => '${_number(fraction * 188.5)} 188.5';
   String percent(double fraction) => '${(fraction * 100).round()}';
@@ -149,16 +175,7 @@ ${categoryBars()}    </g>
     <!-- Findings on real apps: stacked bars, 1.4px per finding -->
     <text x="300" y="392" font-size="15" font-weight="600" fill="#58a6ff">Findings on real open-source apps</text>
     <g font-size="12.5">
-      <text x="300" y="424" fill="#c9d1d9">Wonderous</text>
-      <rect x="378" y="413" width="2.8" height="14" fill="#f85149"/>
-      <rect x="380.8" y="413" width="121.8" height="14" fill="#d29922"/>
-      <rect x="502.6" y="413" width="124.6" height="14" fill="#8b949e"/>
-      <text x="636" y="424" fill="#e6edf3" font-weight="600">178</text>
-      <text x="300" y="452" fill="#c9d1d9">Spotube</text>
-      <rect x="378" y="441" width="134.4" height="14" fill="#d29922"/>
-      <rect x="512.4" y="441" width="75.6" height="14" fill="#8b949e"/>
-      <text x="597" y="452" fill="#e6edf3" font-weight="600">150</text>
-      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="394" y="482" fill="#8b949e">error</text>
+${findingBars()}      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="394" y="482" fill="#8b949e">error</text>
       <circle cx="446" cy="478" r="5" fill="#d29922"/><text x="456" y="482" fill="#8b949e">warning</text>
       <circle cx="526" cy="478" r="5" fill="#8b949e"/><text x="536" y="482" fill="#8b949e">info</text>
     </g>
@@ -223,14 +240,14 @@ ${categoryBars()}    </g>
     <text x="720" y="428" font-size="15" font-weight="600" fill="#58a6ff">Roadmap</text>
     <g font-size="12.5" fill="#c9d1d9">
       <text x="720" y="454"><tspan fill="#3fb950">✓</tspan>  rules · security · CVEs · measure · prioritize</text>
-      <text x="720" y="474"><tspan fill="#3fb950">✓</tspan>  repeatable flows · Riverpod · analyzer 10</text>
-      <text x="720" y="494"><tspan fill="#a371f7">●</tspan>  publishing 0.2.0 on pub.dev</text>
+      <text x="720" y="474"><tspan fill="#3fb950">✓</tspan>  flows · Riverpod · on pub.dev (150/160)</text>
+      <text x="720" y="494"><tspan fill="#a371f7">●</tspan>  0.3.0: performance rules · newer analyzer</text>
       <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  PR regression check · HTML report · IDE plugin</text>
     </g>
     <rect x="720" y="532" width="356" height="10" rx="5" fill="#21262d"/>
-    <rect x="720" y="532" width="237" height="10" rx="5" fill="#3fb950"/>
-    <rect x="953" y="532" width="30" height="10" fill="#a371f7"/>
-    <text x="720" y="562" font-size="12" fill="#8b949e">8 done · 1 doing · 3 to do</text>
+    <rect x="720" y="532" width="246" height="10" rx="5" fill="#3fb950"/>
+    <rect x="962" y="532" width="31" height="10" fill="#a371f7"/>
+    <text x="720" y="562" font-size="12" fill="#8b949e">9 done · 1 doing · 3 to do</text>
 
     <!-- Bottom: language bar -->
     <line x1="20" y1="600" x2="1080" y2="600" stroke="#30363d"/>

@@ -17,7 +17,7 @@
     <text x="20" y="226" fill="#79c0ff">lib/ui/screens/editorial/widgets/_scrolling_content.dart</text>
     <text y="248"><tspan x="40" fill="#c9d1d9">272:37</tspan><tspan x="104" fill="#e3b341">warning</tspan><tspan x="172" fill="#c9d1d9">`FutureBuilder`'s `future` is created inline in `build()`, so it restarts … </tspan><tspan fill="#8b949e">(future_created_in_build)</tspan></text>
     <text x="40" y="278" fill="#8b949e">…</text>
-    <text x="20" y="308" fill="#c9d1d9">178 finding(s).</text>
+    <text x="20" y="308" fill="#c9d1d9">183 finding(s).</text>
     <text x="20" y="336" fill="#8b949e">Every finding above was checked by hand against the code, at the exact line.</text>
   </g>
 </svg>

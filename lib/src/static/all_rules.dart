@@ -1,5 +1,6 @@
 import 'rule.dart';
 import 'rules/accessibility_rules.dart';
+import 'rules/animation_rebuild_rules.dart';
 import 'rules/async_widget_rules.dart';
 import 'rules/avoid_logging_sensitive_data.dart';
 import 'rules/avoid_print.dart';
@@ -80,4 +81,7 @@ List<StaticRule> allRules() => [
       SqlTableMissingConstraintsRule(),
       InsecureCertificateValidationRule(),
       SetstateInListBuilderRule(),
+      MediaQueryOfSinglePropertyRule(),
+      SetStateInAnimationListenerRule(),
+      OpacityInAnimationRule(),
     ];
