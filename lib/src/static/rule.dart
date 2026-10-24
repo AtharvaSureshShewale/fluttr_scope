@@ -3,6 +3,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:path/path.dart' as p;
 
+import '../model/category.dart';
 import '../model/finding.dart';
 import '../model/source_location.dart';
 
@@ -10,6 +11,9 @@ import '../model/source_location.dart';
 abstract class StaticRule {
   /// Stable identifier reported on every [Finding] this rule produces.
   String get id;
+
+  /// The category of every [Finding] this rule produces.
+  Category get category;
 
   List<Finding> check(ResolvedUnitResult unit, RuleContext context);
 }

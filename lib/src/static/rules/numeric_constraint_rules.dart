@@ -36,6 +36,9 @@ class OpacityOutOfRangeRule extends StaticRule {
   String get id => 'opacity_out_of_range';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_TypeVisitor('Opacity', (node) {
@@ -61,6 +64,9 @@ class OpacityOutOfRangeRule extends StaticRule {
 class InvalidAspectRatioRule extends StaticRule {
   @override
   String get id => 'invalid_aspect_ratio';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
@@ -90,6 +96,9 @@ class FlexValueNonPositiveRule extends StaticRule {
   String get id => 'flex_value_non_positive';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_MultiTypeVisitor({'Expanded', 'Flexible'}, (node) {
@@ -115,6 +124,9 @@ class FlexValueNonPositiveRule extends StaticRule {
 class SliderInvalidRangeRule extends StaticRule {
   @override
   String get id => 'slider_invalid_range';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
@@ -144,6 +156,9 @@ class SliderInvalidRangeRule extends StaticRule {
 class BottomNavigationBarTooFewItemsRule extends StaticRule {
   @override
   String get id => 'bottom_navigation_bar_too_few_items';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

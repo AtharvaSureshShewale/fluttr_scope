@@ -16,6 +16,9 @@ class TodoCommentRule extends StaticRule {
   String get id => 'todo_comment';
 
   @override
+  Category get category => Category.style;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     final lines = unit.content.split('\n');

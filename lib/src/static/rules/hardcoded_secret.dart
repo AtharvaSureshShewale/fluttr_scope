@@ -40,6 +40,9 @@ class HardcodedSecretRule extends StaticRule {
   String get id => 'hardcoded_secret';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node, label) {

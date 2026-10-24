@@ -14,6 +14,9 @@ class AvoidPrintRule extends StaticRule {
   String get id => 'avoid_print';
 
   @override
+  Category get category => Category.style;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node) {

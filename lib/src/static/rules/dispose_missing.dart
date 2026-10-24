@@ -29,6 +29,9 @@ class DisposeMissingRule extends StaticRule {
   String get id => 'dispose_missing';
 
   @override
+  Category get category => Category.performance;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(ClassVisitor((classNode) {

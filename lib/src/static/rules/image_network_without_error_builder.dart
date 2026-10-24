@@ -16,6 +16,9 @@ class ImageNetworkWithoutErrorBuilderRule extends StaticRule {
   String get id => 'image_network_without_error_builder';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node) {

@@ -28,6 +28,9 @@ class MissingMountedCheckRule extends StaticRule {
   String get id => 'missing_mounted_check';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(ClassVisitor((classNode) {

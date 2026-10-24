@@ -47,6 +47,9 @@ class UnboundedScrollableInFlexRule extends StaticRule {
   String get id => 'unbounded_scrollable_in_flex';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node, flexName, scrollAxis, unboundedAxis) {

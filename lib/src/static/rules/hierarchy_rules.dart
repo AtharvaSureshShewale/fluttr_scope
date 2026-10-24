@@ -22,6 +22,9 @@ class ExpandedOutsideFlexRule extends StaticRule {
   String get id => 'expanded_outside_flex';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_RequiredParentVisitor(
@@ -49,6 +52,9 @@ class ExpandedOutsideFlexRule extends StaticRule {
 class PositionedOutsideStackRule extends StaticRule {
   @override
   String get id => 'positioned_outside_stack';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

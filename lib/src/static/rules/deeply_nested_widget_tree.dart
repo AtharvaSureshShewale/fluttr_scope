@@ -18,6 +18,9 @@ class DeeplyNestedWidgetTreeRule extends StaticRule {
   String get id => 'deeply_nested_widget_tree';
 
   @override
+  Category get category => Category.style;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(BuildMethodVisitor((buildMethod) {

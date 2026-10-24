@@ -18,6 +18,9 @@ class KeyCreatedInBuildRule extends StaticRule {
   String get id => 'key_created_in_build';
 
   @override
+  Category get category => Category.performance;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(BuildMethodVisitor((buildMethod) {
@@ -65,6 +68,9 @@ class InheritedWidgetOfInInitStateRule extends StaticRule {
 
   @override
   String get id => 'inherited_widget_of_in_initstate';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
@@ -131,6 +137,9 @@ class _OfCallVisitor extends RecursiveAstVisitor<void> {
 class BuildContextStoredInFieldRule extends StaticRule {
   @override
   String get id => 'build_context_stored_in_field';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

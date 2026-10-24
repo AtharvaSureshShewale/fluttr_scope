@@ -16,6 +16,9 @@ class ContainerColorAndDecorationConflictRule extends StaticRule {
   String get id => 'container_color_and_decoration_conflict';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node) {

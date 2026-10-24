@@ -19,6 +19,9 @@ class ShrinkwrapListviewRule extends StaticRule {
   String get id => 'shrinkwrap_listview';
 
   @override
+  Category get category => Category.performance;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node) {

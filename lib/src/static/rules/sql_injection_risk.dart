@@ -26,6 +26,9 @@ class SqlInjectionRiskRule extends StaticRule {
   String get id => 'sql_injection_risk';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor((node) {

@@ -21,6 +21,9 @@ class InsecureRandomForSecretRule extends StaticRule {
   String get id => 'insecure_random_for_secret';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_RandomVisitor((node) {
@@ -67,6 +70,9 @@ class UnrestrictedWebviewJavascriptRule extends StaticRule {
   String get id => 'unrestricted_webview_javascript';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_JavascriptModeVisitor((node) {
@@ -105,6 +111,9 @@ class _JavascriptModeVisitor extends RecursiveAstVisitor<void> {
 class TextfieldPasswordNotObscuredRule extends StaticRule {
   @override
   String get id => 'textfield_password_not_obscured';
+
+  @override
+  Category get category => Category.security;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

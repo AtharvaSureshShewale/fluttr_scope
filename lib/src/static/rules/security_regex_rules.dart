@@ -28,6 +28,9 @@ class InsecureHttpUrlRule extends StaticRule {
   String get id => 'insecure_http_url';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     if (isTestFile(unit, context)) return findings;
@@ -60,6 +63,9 @@ class SensitiveQueryParamRule extends StaticRule {
   String get id => 'sensitive_query_param';
 
   @override
+  Category get category => Category.security;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_StringVisitor((node, value) {
@@ -87,6 +93,9 @@ final _ipAddress = RegExp(r'^(?!127\.0\.0\.1$|0\.0\.0\.0$)(\d{1,3}\.){3}\d{1,3}$
 class HardcodedIpAddressRule extends StaticRule {
   @override
   String get id => 'hardcoded_ip_address';
+
+  @override
+  Category get category => Category.security;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

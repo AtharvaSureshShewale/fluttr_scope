@@ -21,6 +21,9 @@ class FutureBuilderMissingErrorCheckRule extends StaticRule {
   String get id => 'future_builder_missing_error_check';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) =>
       _checkMissingErrorHandling(unit, context, id, 'FutureBuilder');
 }
@@ -29,6 +32,9 @@ class FutureBuilderMissingErrorCheckRule extends StaticRule {
 class StreamBuilderMissingErrorCheckRule extends StaticRule {
   @override
   String get id => 'stream_builder_missing_error_check';
+
+  @override
+  Category get category => Category.correctness;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) =>
@@ -66,6 +72,9 @@ class FutureCreatedInBuildRule extends StaticRule {
 
   @override
   String get id => 'future_created_in_build';
+
+  @override
+  Category get category => Category.performance;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

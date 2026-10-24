@@ -34,6 +34,18 @@ void main() {
         (f) => f.ruleId == ruleId && f.location.file == 'lib/$file',
       );
 
+  test('every rule declares the category its findings actually carry', () {
+    final declared = {for (final r in allRules()) r.id: r.category};
+    final fired = <String>{};
+    for (final f in findings) {
+      if (!declared.containsKey(f.ruleId)) continue;
+      fired.add(f.ruleId);
+      expect(f.category, declared[f.ruleId], reason: '${f.ruleId} at ${f.location}');
+    }
+    // Every rule fires somewhere in the fixture app, so all 47 are checked.
+    expect(fired, declared.keys.toSet());
+  });
+
   test('avoid_print flags a bare print() call at its exact location', () {
     final matches = inFile('avoid_print', 'main.dart');
     expect(matches, hasLength(1));

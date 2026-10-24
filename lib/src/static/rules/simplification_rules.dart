@@ -18,6 +18,9 @@ class EmptyContainerInsteadOfSizedboxRule extends StaticRule {
   String get id => 'empty_container_instead_of_sizedbox';
 
   @override
+  Category get category => Category.performance;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_Visitor('Container', (node) {
@@ -48,6 +51,9 @@ class EmptyContainerInsteadOfSizedboxRule extends StaticRule {
 class UnnecessaryColumnOrRowRule extends StaticRule {
   @override
   String get id => 'unnecessary_column_or_row';
+
+  @override
+  Category get category => Category.style;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
@@ -95,6 +101,9 @@ class EmptyFlexChildrenRule extends StaticRule {
   String get id => 'empty_flex_children';
 
   @override
+  Category get category => Category.style;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_ChildrenCountVisitor({'Column', 'Row'}, (node, count) {
@@ -124,6 +133,9 @@ class EmptyFlexChildrenRule extends StaticRule {
 class WidgetReturningMethodRule extends StaticRule {
   @override
   String get id => 'widget_returning_method';
+
+  @override
+  Category get category => Category.performance;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

@@ -24,6 +24,9 @@ class SetStateInBuildRule extends StaticRule {
   String get id => 'setstate_in_build';
 
   @override
+  Category get category => Category.correctness;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(BuildMethodVisitor((buildMethod) {

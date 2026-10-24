@@ -18,6 +18,9 @@ class MissingTooltipForIconButtonRule extends StaticRule {
   String get id => 'missing_tooltip_for_iconbutton';
 
   @override
+  Category get category => Category.accessibility;
+
+  @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     final findings = <Finding>[];
     unit.unit.accept(_TypeVisitor('IconButton', (node) {
@@ -44,6 +47,9 @@ class ImageMissingSemanticLabelRule extends StaticRule {
 
   @override
   String get id => 'image_missing_semantic_label';
+
+  @override
+  Category get category => Category.accessibility;
 
   @override
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {

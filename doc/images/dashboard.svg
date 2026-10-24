@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640" role="img" aria-label="fluttr_scope project dashboard: 47 Dart rules plus 3 file checks, 5 commands, 371 tests passing, CI green on Flutter 3.35.2 and stable; rules by category; findings on Wonderous and Spotube; verification scores; roadmap progress">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640" role="img" aria-label="fluttr_scope project dashboard: 47 Dart rules plus 3 file checks, 5 commands, 372 tests passing, CI green on Flutter 3.35.2 and stable; rules by category; findings on Wonderous and Spotube; verification scores; roadmap progress">
   <defs>
     <linearGradient id="logo" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#1f6feb"/>
@@ -40,7 +40,7 @@
       <text x="300" y="74">▸  <tspan font-weight="700" fill="#e6edf3">47</tspan> Dart rules + <tspan font-weight="700" fill="#e6edf3">3</tspan> file checks</text>
       <text x="300" y="98">▸  <tspan font-weight="700" fill="#e6edf3">5</tspan> commands: analyze, security,</text>
       <text x="322" y="116">measure, prioritize, correlate</text>
-      <text x="300" y="140">▸  <tspan font-weight="700" fill="#e6edf3">371</tspan> tests passing</text>
+      <text x="300" y="140">▸  <tspan font-weight="700" fill="#e6edf3">372</tspan> tests passing</text>
       <text x="510" y="74">▸  <tspan font-weight="700" fill="#e6edf3">8</tspan> real apps audited</text>
       <text x="510" y="98">▸  CI: Flutter 3.35.2 + stable</text>
       <text x="510" y="122">▸  live CVE lookup (OSV.dev)</text>
@@ -105,7 +105,7 @@
         <circle r="30" fill="none" stroke="#3fb950" stroke-width="6" stroke-dasharray="188.5 188.5" transform="rotate(-90)"/>
         <text y="6" font-size="18" font-weight="700" fill="#3fb950">100</text>
         <text y="52" fill="#c9d1d9">Tests passing</text>
-        <text y="68" fill="#8b949e">371 of 371</text>
+        <text y="68" fill="#8b949e">372 of 372</text>
       </g>
       <g transform="translate(856,108)">
         <circle r="30" fill="none" stroke="#21262d" stroke-width="6"/>

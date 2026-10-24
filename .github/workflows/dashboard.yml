@@ -1,0 +1,56 @@
+name: Dashboard
+
+# Keeps the README's dashboard (doc/images/dashboard.svg) current: on every
+# push to main it reruns the tests, regenerates the image from the package
+# itself, and commits it if anything changed.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Two quick pushes shouldn't race to commit the image.
+concurrency:
+  group: dashboard
+  cancel-in-progress: false
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      # Full history, so the commit below can rebase onto a newer main.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.2'
+
+      - run: dart pub get
+      - run: flutter pub get
+        working-directory: test/fixtures/sample_app
+
+      # A failing test shows up on the dashboard as less than 100%; CI is
+      # what fails the build.
+      - run: dart test --reporter json > "$RUNNER_TEMP/test-results.json" || true
+      - run: dart run tool/generate_dashboard.dart "$RUNNER_TEMP/test-results.json"
+
+      # Pushes made with GITHUB_TOKEN don't trigger workflows, so this
+      # commit doesn't start another run.
+      - name: Commit the dashboard if it changed
+        run: |
+          if git diff --quiet -- doc/images/dashboard.svg; then
+            echo "Dashboard unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add doc/images/dashboard.svg
+          git commit -m "Dashboard: regenerate from ${GITHUB_SHA::7}"
+          git pull --rebase origin main
+          git push origin HEAD:main
