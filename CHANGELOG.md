@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3.0
 
 - **3 new performance rules**, each checked by hand on real apps
   (Wonderous, Spotube and 4 others: 139 findings, no false alarms):

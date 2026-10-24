@@ -70,6 +70,36 @@ against the code**. Click through to the exact line.
 | Wonderous | [API keys in source control](https://github.com/gskinnerTeam/flutter-wonderous-app/blob/ff1ab1b8d086a91bab09509d896450dfe83fcb6c/lib/logic/unsplash_service.dart#L5) | Unsplash access and secret keys, hardcoded in a public repo. |
 | [Spotube](https://github.com/KRTirtho/spotube) | [`FutureBuilder` ignores errors](https://github.com/KRTirtho/spotube/blob/69a310c78f5ceaf4eab7dfee98f187d38211c9ba/lib/pages/library/user_local_tracks/local_folder.dart#L156) | If reading the folder size fails, the screen silently shows **"0 GB"**. |
 
+### A real 🔥: found, ranked first, fixed, measured
+
+`prioritize` ran Wonderous's home screen 3 times with a [flow](#repeatable-flows)
+that swipes through the wonders. Out of 183 findings, it ranked this one first:
+
+```
+🔥 lib/ui/wonder_illustrations/common/wonder_illustration_builder.dart:30:7  warning  setstate_in_animation_listener
+    Measured at line 59 (nothing at this line is tracked): rebuilt 1230x (median of 3 run(s));
+    125 of 223 frames it rebuilt in were slow (confidence medium).
+```
+
+[`..addListener(() => setState(() {}))`](https://github.com/gskinnerTeam/flutter-wonderous-app/blob/d30aee040e16b56c535f50588dc3e7b36a18f862/lib/ui/wonder_illustrations/common/wonder_illustration_builder.dart#L30)
+rebuilds every illustration on every animation frame, though that `build` only
+checks whether the animation is at 0. The fix: each
+[illustration piece](https://github.com/gskinnerTeam/flutter-wonderous-app/blob/d30aee040e16b56c535f50588dc3e7b36a18f862/lib/ui/wonder_illustrations/common/illustration_piece.dart#L86)
+animates itself with an `AnimatedBuilder`, and the listener calls `setState`
+only when "at 0" changes (16 changed lines). Measured again, same flow, 3 runs:
+
+| Per run (median) | Before | After |
+|---|---|---|
+| Widget rebuilds | ~28,500 | ~17,500 (**−38%**) |
+| One illustration piece's rebuilds | 109 | 12 (**−89%**) |
+| Slowest frame | 167 ms | 79 ms |
+| Frames over budget | 16.5% | 20.0% |
+
+The share of slow frames didn't drop: in debug mode on an emulator, frame time
+is dominated by other costs. That's why fluttr_scope reports rebuilds during slow
+frames as an association, never as proof that fixing them speeds the app up.
+(Measured on commit `d30aee0`: the newest commit doesn't build for Android.)
+
 <details>
 <summary><b>How do we know the rules are right?</b> (click to expand)</summary>
 
@@ -87,7 +117,7 @@ the real code that fooled it.
 - Real-app testing caught bugs that no unit test had: for example, runtime
   evidence never reached `Image.asset(...)` widgets, because Flutter records a
   named constructor 6 columns later than where the finding pointed.
-- **371** automated tests. CI checks Flutter 3.35.2 and the latest stable,
+- Hundreds of automated tests (the dashboard shows today's count). CI checks Flutter 3.35.2 and the latest stable,
   including installing the package into a fresh Flutter app.
 - Rules favour precision over recall: when a rule can't be sure, it stays
   quiet rather than guess.

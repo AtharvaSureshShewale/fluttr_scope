@@ -233,15 +233,15 @@ ${findingBars()}      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="3
       <circle cx="728" cy="304" r="6" fill="#8b949e"/><text x="744" y="309">Never ran in this session</text>
       <circle cx="728" cy="330" r="6" fill="none" stroke="#8b949e" stroke-width="1.5"/><text x="744" y="335">No runtime signal (config, constants)</text>
     </g>
-    <text x="720" y="366" font-size="12.5" fill="#8b949e">Repeatable flows: same actions every run; rebuild</text>
-    <text x="720" y="384" font-size="12.5" fill="#8b949e">variation 9.5% across 3 runs (HIGH confidence).</text>
+    <text x="720" y="366" font-size="12.5" fill="#8b949e">On Wonderous, a setState listener ranked 🔥 first;</text>
+    <text x="720" y="384" font-size="12.5" fill="#8b949e">the fix cut rebuilds 38% (same flow, 3 runs each).</text>
 
     <!-- Roadmap -->
     <text x="720" y="428" font-size="15" font-weight="600" fill="#58a6ff">Roadmap</text>
     <g font-size="12.5" fill="#c9d1d9">
       <text x="720" y="454"><tspan fill="#3fb950">✓</tspan>  rules · security · CVEs · measure · prioritize</text>
       <text x="720" y="474"><tspan fill="#3fb950">✓</tspan>  flows · Riverpod · on pub.dev (150/160)</text>
-      <text x="720" y="494"><tspan fill="#a371f7">●</tspan>  0.3.0: performance rules · newer analyzer</text>
+      <text x="720" y="494"><tspan fill="#a371f7">●</tspan>  0.3.0: performance rules · runtime evidence</text>
       <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  PR regression check · HTML report · IDE plugin</text>
     </g>
     <rect x="720" y="532" width="356" height="10" rx="5" fill="#21262d"/>
