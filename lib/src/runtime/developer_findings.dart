@@ -201,7 +201,7 @@ String formatDeveloperFinding(UnifiedFinding f) {
   // Evidence from another location (see Finding.evidenceLocations): the
   // numbers below are that widget's, so name it.
   if (f.impact case final impact? when impact.location != f.location) {
-    buffer.writeln('   Rebuild data from ${impact.location}, the widget that re-runs this code.');
+    buffer.writeln('   Rebuild data from ${impact.location} (nothing at this line is tracked).');
   }
   buffer.writeln();
 

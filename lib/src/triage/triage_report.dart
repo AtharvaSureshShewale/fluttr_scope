@@ -116,10 +116,12 @@ void _writeFinding(StringBuffer buffer, TriagedFinding t) {
   if (impact != null) {
     // Evidence from another location (see Finding.evidenceLocations) names
     // it, so the count isn't read as this exact line's.
+    final at = impact.location.file == f.location.file
+        ? 'line ${impact.location.line}'
+        : '${impact.location}';
     final where = impact.location == f.location
         ? 'Rebuilt'
-        : 'The widget at ${impact.location.file == f.location.file ? 'line ${impact.location.line}' : '${impact.location}'}, '
-            'which re-runs this code, rebuilt';
+        : 'Measured at $at (nothing at this line is tracked): rebuilt';
     buffer.writeln(
       '      $where ${impact.rebuildCountStats.median.round()}x (median of ${impact.totalRuns} '
       'run(s)); ${impact.overBudgetFrameCountStats.median.round()} of '

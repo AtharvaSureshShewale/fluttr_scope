@@ -297,6 +297,20 @@ void main() {
       expect(hasColumn(listener), isTrue);
     });
 
+    test('borrows evidence only from widgets built whenever the code runs', () {
+      const file = 'evidence_examples.dart';
+      final (columnLine, columnCol) = locate('return Column(', relativeFile: file, columnOf: 'Column');
+      Finding at(String rule, String needle) {
+        final (line, _) = locate(needle, relativeFile: file);
+        return inFile(rule, file).singleWhere((f) => f.location.line == line);
+      }
+
+      final key = at('key_created_in_build', 'final key = GlobalKey();');
+      expect(key.evidenceLocations.any((l) => l.line == columnLine && l.column == columnCol), isTrue);
+      expect(at('missing_const_constructor', 'return SizedBox.expand();').evidenceLocations, isEmpty);
+      expect(at('missing_const_constructor', 'child ?? SizedBox.shrink();').evidenceLocations, isEmpty);
+    });
+
     test('suggests the narrowest lookup', () {
       final messages = inFile('media_query_of_single_property', 'animation_rebuild_examples.dart')
           .map((f) => f.message)

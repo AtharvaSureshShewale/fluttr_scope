@@ -118,22 +118,60 @@ bool isTestFile(ResolvedUnitResult unit, RuleContext context) {
 }
 
 /// [Finding.evidenceLocations] for code at [node] that Flutter's rebuild
-/// tracking can't see directly: the constructor calls [node] is nested
-/// inside, out to its enclosing function -- whenever one of those widgets
-/// is rebuilt, this code ran again. When there are none (a local variable
-/// at the top of `build`), the constructor calls of that function body.
+/// tracking can't see directly: a widget that is only ever built when
+/// [node] runs too.
+///
+/// That's the nearest constructor call [node] sits inside, if nothing
+/// conditional (`?:`, `??`, `&&`, collection `if`/`for`) or closure lies in
+/// between. Failing that, when [node] runs unconditionally at the start of
+/// its function -- before any branch or early `return` -- every
+/// constructor call in that function. Otherwise none: a widget built on
+/// another branch says nothing about this code (found on Wonderous, where
+/// `if (...) return SizedBox.expand();` was credited with the rebuilds of
+/// the widget built when that branch *isn't* taken).
 List<SourceLocation> rerunEvidence(
   ResolvedUnitResult unit,
   AstNode node,
   RuleContext context,
 ) {
-  final enclosing = [
-    for (var n = node.parent; n != null && n is! FunctionBody; n = n.parent)
-      if (n is InstanceCreationExpression) locationOf(unit, n, context),
-  ];
-  if (enclosing.isNotEmpty) return enclosing;
+  for (var n = node.parent; n != null && !_isConditional(n); n = n.parent) {
+    if (n is InstanceCreationExpression) return [locationOf(unit, n, context)];
+    if (n is Statement || n is FunctionBody) break;
+  }
   final body = node.thisOrAncestorOfType<FunctionBody>();
-  return body == null ? const [] : creationsIn(unit, body, context);
+  if (body == null || !_runsWheneverBodyRuns(node, body)) return const [];
+  return creationsIn(unit, body, context);
+}
+
+bool _isConditional(AstNode node) => switch (node) {
+      ConditionalExpression() || IfElement() || ForElement() || SwitchExpression() => true,
+      FunctionBody() || FunctionExpression() => true,
+      IfStatement() || SwitchStatement() || ForStatement() || WhileStatement() || DoStatement() ||
+          TryStatement() =>
+        true,
+      BinaryExpression(:final operator) => operator.type == TokenType.QUESTION_QUESTION ||
+          operator.type == TokenType.AMPERSAND_AMPERSAND ||
+          operator.type == TokenType.BAR_BAR,
+      _ => false,
+    };
+
+/// Whether [node] runs every time [body] does: nothing conditional between
+/// them, and (in a block) no statement before it that could branch or
+/// return early.
+bool _runsWheneverBodyRuns(AstNode node, FunctionBody body) {
+  final block = body is BlockFunctionBody ? body.block : null;
+  Statement? statement; // the one directly in the function's block
+  for (var n = node.parent; n != null && n != body; n = n.parent) {
+    if (_isConditional(n)) return false;
+    if (n is Statement && n.parent == block) statement = n;
+  }
+  if (body is ExpressionFunctionBody) return true;
+  if (block == null || statement == null) return false;
+  final statements = block.statements;
+  final index = statements.indexOf(statement);
+  return statements
+      .take(index)
+      .every((s) => s is VariableDeclarationStatement || s is ExpressionStatement);
 }
 
 /// The locations of the constructor calls [body] runs every time it runs:

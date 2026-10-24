@@ -44,8 +44,9 @@ class Finding {
   /// none -- because nothing there rebuilds in Flutter's tracking: a
   /// low-level widget like `Opacity` or `Padding` (only widgets with a
   /// `build` are reported), a key or future created inline, a `setState`
-  /// call. These are the widgets whose rebuilds re-run this code, e.g. the
-  /// widgets it sits inside. Not part of the report formats.
+  /// call. These are widgets only ever built when this code runs too, e.g.
+  /// the widget it sits directly inside (see `rerunEvidence`). Not part of
+  /// the report formats.
   final List<SourceLocation> evidenceLocations;
 
   const Finding({

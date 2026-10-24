@@ -142,7 +142,7 @@ void main() {
             overallConfidence: null,
           ),
         );
-        expect(report, contains('The widget at line 83, which re-runs this code, rebuilt 1470x'));
+        expect(report, contains('Measured at line 83 (nothing at this line is tracked): rebuilt 1470x'));
       });
     });
 
