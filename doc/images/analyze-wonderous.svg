@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="356" viewBox="0 0 960 356" role="img" aria-label="fluttr_scope analyze output on the Wonderous app: a hardcoded secret, a PageController never disposed, setState after await without a mounted check, and a FutureBuilder future created in build">
+  <rect x="0.5" y="0.5" width="959" height="355" rx="10" fill="#0d1117" stroke="#30363d"/>
+  <rect x="0.5" y="0.5" width="959" height="34" rx="10" fill="#161b22"/>
+  <rect x="0.5" y="24" width="959" height="11" fill="#161b22"/>
+  <line x1="0" y1="35" x2="960" y2="35" stroke="#30363d"/>
+  <circle cx="22" cy="18" r="6" fill="#ff5f57"/>
+  <circle cx="42" cy="18" r="6" fill="#febc2e"/>
+  <circle cx="62" cy="18" r="6" fill="#28c840"/>
+  <text x="480" y="22" text-anchor="middle" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="12" fill="#8b949e">fluttr_scope analyze · Wonderous (gskinner's showcase app), real output excerpt</text>
+  <g font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="13">
+    <text x="20" y="64"><tspan fill="#7ee787">$</tspan><tspan fill="#c9d1d9"> dart run fluttr_scope analyze wonderous/</tspan></text>
+    <text x="20" y="100" fill="#79c0ff">lib/logic/unsplash_service.dart</text>
+    <text y="122"><tspan x="40" fill="#c9d1d9">5:28</tspan><tspan x="104" fill="#ff7b72">error</tspan><tspan x="172" fill="#c9d1d9">This looks like a hardcoded secret assigned to `unsplashAccessKey`. … </tspan><tspan fill="#8b949e">(hardcoded_secret)</tspan></text>
+    <text x="20" y="152" fill="#79c0ff">lib/ui/screens/home/wonders_home_screen.dart</text>
+    <text y="174"><tspan x="40" fill="#c9d1d9">33:29</tspan><tspan x="104" fill="#e3b341">warning</tspan><tspan x="172" fill="#c9d1d9">Field `_pageController` is never disposed in `dispose()`. </tspan><tspan fill="#8b949e">(dispose_missing)</tspan></text>
+    <text y="196"><tspan x="40" fill="#c9d1d9">91:5</tspan><tspan x="104" fill="#e3b341">warning</tspan><tspan x="172" fill="#c9d1d9">`setState()` called after `await` without checking `mounted` first; … </tspan><tspan fill="#8b949e">(missing_mounted_check)</tspan></text>
+    <text x="20" y="226" fill="#79c0ff">lib/ui/screens/editorial/widgets/_scrolling_content.dart</text>
+    <text y="248"><tspan x="40" fill="#c9d1d9">272:37</tspan><tspan x="104" fill="#e3b341">warning</tspan><tspan x="172" fill="#c9d1d9">`FutureBuilder`'s `future` is created inline in `build()`, so it restarts … </tspan><tspan fill="#8b949e">(future_created_in_build)</tspan></text>
+    <text x="40" y="278" fill="#8b949e">…</text>
+    <text x="20" y="308" fill="#c9d1d9">178 finding(s).</text>
+    <text x="20" y="336" fill="#8b949e">Every finding above was checked by hand against the code, at the exact line.</text>
+  </g>
+</svg>

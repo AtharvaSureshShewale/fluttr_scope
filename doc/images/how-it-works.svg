@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="300" viewBox="0 0 960 300" role="img" aria-label="How fluttr_scope works: your code goes through 47 Flutter rules to findings at a file, line and column; your app, driven by a flow, goes through the Dart VM to lines that ran, widget rebuilds and frame timing; both are joined on the exact source line into a ranked report">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#58a6ff"/>
+    </marker>
+  </defs>
+  <rect x="0.5" y="0.5" width="959" height="299" rx="10" fill="#0d1117" stroke="#30363d"/>
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#c9d1d9">
+    <text x="24" y="34" font-size="13" fill="#8b949e" letter-spacing="1">STATIC</text>
+    <rect x="24" y="46" width="200" height="64" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text x="124" y="74" font-size="15" font-weight="600" text-anchor="middle">Your source code</text>
+    <text x="124" y="95" font-size="12" fill="#8b949e" text-anchor="middle">every .dart file, manifests, lockfile</text>
+    <rect x="276" y="46" width="230" height="64" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text x="391" y="74" font-size="15" font-weight="600" text-anchor="middle">47 Flutter rules</text>
+    <text x="391" y="95" font-size="12" fill="#8b949e" text-anchor="middle">findings at file : line : column</text>
+
+    <text x="24" y="168" font-size="13" fill="#8b949e" letter-spacing="1">RUNTIME</text>
+    <rect x="24" y="180" width="200" height="64" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text x="124" y="208" font-size="15" font-weight="600" text-anchor="middle">Your app, running</text>
+    <text x="124" y="229" font-size="12" fill="#8b949e" text-anchor="middle">driven by a repeatable flow</text>
+    <rect x="276" y="180" width="230" height="64" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text x="391" y="208" font-size="15" font-weight="600" text-anchor="middle">Dart VM service</text>
+    <text x="391" y="229" font-size="12" fill="#8b949e" text-anchor="middle">lines that ran · rebuilds · frame times</text>
+
+    <path d="M224,78 L270,78" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M224,212 L270,212" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M506,78 C540,78 540,130 572,130" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <path d="M506,212 C540,212 540,160 572,160" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+    <rect x="578" y="46" width="358" height="198" rx="8" fill="#161b22" stroke="#58a6ff"/>
+    <text x="598" y="76" font-size="15" font-weight="600">Joined on the exact source line</text>
+    <text x="598" y="96" font-size="12" fill="#8b949e">then every finding is ranked by what really happened</text>
+    <circle cx="606" cy="126" r="6" fill="#ff7b72"/>
+    <text x="622" y="131" font-size="13">Fix first: its widget rebuilt in slow frames</text>
+    <circle cx="606" cy="156" r="6" fill="#58a6ff"/>
+    <text x="622" y="161" font-size="13">Ran during the session</text>
+    <circle cx="606" cy="186" r="6" fill="#8b949e"/>
+    <text x="622" y="191" font-size="13">Never ran in this session</text>
+    <circle cx="606" cy="216" r="6" fill="none" stroke="#8b949e" stroke-width="1.5"/>
+    <text x="622" y="221" font-size="13">No runtime signal (config, constants)</text>
+
+    <text x="480" y="282" font-size="12" fill="#8b949e" text-anchor="middle">Errors and warnings are always listed. Runtime evidence only decides the order.</text>
+  </g>
+</svg>

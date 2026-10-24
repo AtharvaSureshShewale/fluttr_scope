@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="330" viewBox="0 0 960 330" role="img" aria-label="fluttr_scope measure with a flow: three runs with their slow-frame percentages, and a diagnosis saying the app did the same work each run, so timing differences come from the device">
+  <rect x="0.5" y="0.5" width="959" height="329" rx="10" fill="#0d1117" stroke="#30363d"/>
+  <rect x="0.5" y="0.5" width="959" height="34" rx="10" fill="#161b22"/>
+  <rect x="0.5" y="24" width="959" height="11" fill="#161b22"/>
+  <line x1="0" y1="35" x2="960" y2="35" stroke="#30363d"/>
+  <circle cx="22" cy="18" r="6" fill="#ff5f57"/>
+  <circle cx="42" cy="18" r="6" fill="#febc2e"/>
+  <circle cx="62" cy="18" r="6" fill="#28c840"/>
+  <text x="480" y="22" text-anchor="middle" font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="12" fill="#8b949e">fluttr_scope measure --flow · Android emulator, real output excerpt</text>
+  <g font-family="SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace" font-size="13">
+    <text x="20" y="64"><tspan fill="#7ee787">$</tspan><tspan fill="#c9d1d9"> dart run fluttr_scope measure --runs 3 --flow integration_test/dashboard_flow_test.dart</tspan></text>
+    <text x="40" y="96" fill="#8b949e">The flow taps, scrolls and switches tabs by itself, the same way every run.</text>
+    <text x="20" y="128" fill="#c9d1d9">Runs:</text>
+    <text y="150"><tspan x="40" fill="#c9d1d9">#1</tspan><tspan x="76" fill="#e3b341">5.3%</tspan><tspan x="132" fill="#c9d1d9">0 jank cluster(s)  slowest=209.7ms</tspan></text>
+    <text y="172"><tspan x="40" fill="#c9d1d9">#2</tspan><tspan x="76" fill="#e3b341">14.1%</tspan><tspan x="132" fill="#c9d1d9">1 jank cluster(s)  slowest=289.2ms</tspan></text>
+    <text y="194"><tspan x="40" fill="#c9d1d9">#3</tspan><tspan x="76" fill="#e3b341">10.0%</tspan><tspan x="132" fill="#c9d1d9">1 jank cluster(s)  slowest=340.8ms</tspan></text>
+    <text x="20" y="226" fill="#c9d1d9">Flow determinism:</text>
+    <text x="40" y="248" fill="#c9d1d9">Every run was driven by the flow integration_test/dashboard_flow_test.dart, and rebuild</text>
+    <text x="40" y="270"><tspan fill="#c9d1d9">activity was consistent across runs (CoV 9.5%): </tspan><tspan fill="#7ee787">the app did the same work each run,</tspan></text>
+    <text x="40" y="292"><tspan fill="#7ee787">so differences in frame timing come from the device or environment, not the app.</tspan></text>
+  </g>
+</svg>
