@@ -125,6 +125,12 @@ Comparison compareMeasurements(
   } else if (beforeFlow != afterFlow) {
     warnings.add('The measurements used different flows ($beforeFlow, $afterFlow).');
   }
+  final beforeMode = _buildMode(before);
+  final afterMode = _buildMode(after);
+  if (beforeMode != afterMode) {
+    warnings.add('One measurement is a $beforeMode build and the other a $afterMode build: '
+        'debug builds are much slower, so frame timings are not comparable.');
+  }
   final beforeDevice = _device(before);
   final afterDevice = _device(after);
   if (beforeDevice != null && afterDevice != null && beforeDevice != afterDevice) {
@@ -152,9 +158,13 @@ Comparison compareMeasurements(
   final afterRebuilds = _intList(after['rebuildsPerRun']);
   final byFile = <MetricComparison>[];
   if (beforeRebuilds == null || afterRebuilds == null) {
-    warnings.add('Rebuild counts are missing from '
-        '${beforeRebuilds == null ? beforeLabel : afterLabel} (measured with fluttr_scope '
-        'before 0.5.0); comparing frame timing only.');
+    final missing = beforeRebuilds == null ? before : after;
+    warnings.add(_buildMode(missing) == 'profile'
+        ? 'Rebuild counts are only measured in debug builds (this is a profile build); '
+            'comparing frame timing only.'
+        : 'Rebuild counts are missing from '
+            '${beforeRebuilds == null ? beforeLabel : afterLabel} (measured with fluttr_scope '
+            'before 0.5.0); comparing frame timing only.');
   } else {
     headline.add(MetricComparison('Rebuilds (after warm-up)', '', beforeRebuilds, afterRebuilds));
     final beforeFiles = _filesPerRun(before);
@@ -192,6 +202,9 @@ void _checkShape(Map<String, Object?> json, String label) {
     throw CompareInputException('$label has no valid runs to compare.');
   }
 }
+
+String _buildMode(Map<String, Object?> json) =>
+    (json['environment'] as Map<String, Object?>?)?['buildMode'] as String? ?? 'debug';
 
 String? _device(Map<String, Object?> json) =>
     (json['environment'] as Map<String, Object?>?)?['device'] as String?;

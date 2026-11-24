@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fluttr_scope/src/compare/compare.dart';
 import 'package:fluttr_scope/src/model/source_location.dart';
+import 'package:fluttr_scope/src/runtime/environment_metadata.dart';
 import 'package:fluttr_scope/src/runtime/frame_budget.dart';
 import 'package:fluttr_scope/src/runtime/frame_metrics.dart';
 import 'package:fluttr_scope/src/runtime/multi_run.dart';
@@ -154,6 +155,36 @@ void main() {
     final c = compareMeasurements(before, after);
     expect(c.headline.map((m) => m.name), isNot(contains('Rebuilds (after warm-up)')));
     expect(c.warnings.single, contains('Rebuild counts are missing'));
+  });
+
+  test('profile builds: no rebuild counts, and never compared with debug', () {
+    Map<String, Object?> asProfile(Map<String, Object?> json) => json
+      ..remove('rebuildsPerRun')
+      ..remove('rebuildsByFilePerRun')
+      ..['environment'] = {'device': 'phone', 'buildMode': 'profile'};
+    final debug = _measured([for (var i = 1; i <= 3; i++) _run(i, slowestMs: 50)]);
+    final profile = asProfile(_measured([for (var i = 1; i <= 3; i++) _run(i, slowestMs: 20)]));
+
+    final both = compareMeasurements(profile, asProfile(_measured([for (var i = 1; i <= 3; i++) _run(i, slowestMs: 21)])));
+    expect(both.warnings.single, contains('only measured in debug builds'));
+    expect(both.headline.map((m) => m.name), isNot(contains('Rebuilds (after warm-up)')));
+
+    expect(compareMeasurements(debug, profile).warnings, contains(contains('not comparable')));
+  });
+
+  test('measure leaves rebuild counts out of the JSON of a profile build', () {
+    final runs = [for (var i = 1; i <= 3; i++) _run(i, slowestMs: 20)];
+    Map<String, Object?> json(String mode) => summarizeRuns(
+          requestedRuns: 3,
+          warmup: Duration.zero,
+          captureDuration: const Duration(seconds: 60),
+          validRuns: runs,
+          invalidRuns: const [],
+          environment: detectEnvironment(device: 'phone', buildMode: mode),
+        ).toJson();
+    expect(json('profile'), isNot(contains('rebuildsPerRun')));
+    expect(json('profile')['environment'], containsPair('buildMode', 'profile'));
+    expect(json('debug'), contains('rebuildsPerRun'));
   });
 
   test('rejects JSON that is not a multi-run measurement', () {

@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 
 import '../model/category.dart';
 import '../runtime/developer_findings.dart';
+import '../runtime/environment_metadata.dart';
 import '../runtime/device_detection.dart';
 import '../runtime/frame_budget.dart';
 import '../runtime/measurement_result.dart';
@@ -75,6 +76,14 @@ class MeasureCommand extends Command<int> {
             'a build is slow, e.g. the first Gradle/CMake run).',
       )
       ..addFlag(
+        'profile',
+        negatable: false,
+        help: 'Build in profile mode for frame timings close to what users see. '
+            'Needs a physical device (emulators cannot run profile builds). Rebuild '
+            'counts and line coverage only exist in debug builds, so they are left '
+            'out: measure those in debug mode.',
+      )
+      ..addFlag(
         'technical',
         help: 'Show the raw technical rebuild-to-frame report (rule ids, exact '
             'stats, no plain-language framing) instead of the default '
@@ -101,11 +110,17 @@ class MeasureCommand extends Command<int> {
     final onLaunchOutput = verbose ? (String line) => stderr.writeln('  $line') : null;
 
     final flow = argResults!['flow'] as String?;
+    final profile = argResults!['profile'] as bool;
+    final mode = profile ? 'profile mode' : 'debug mode';
+    if (profile && detectEnvironment(device: device).looksLikeEmulator) {
+      stderr.writeln('--profile needs a physical device: emulators cannot run profile builds.');
+      return 64;
+    }
     if (runs <= 1) {
       // Unchanged from before --runs existed: exactly the original
       // single-run path, reachable via --runs=1.
       stderr.writeln(
-        'Launching on $device (debug mode) and capturing rebuilds '
+        'Launching on $device ($mode) and capturing ${profile ? 'frames' : 'rebuilds'} '
         '${flow == null ? 'for ${seconds}s' : 'until the flow finishes (at most ${seconds}s)'}...',
       );
 
@@ -117,6 +132,7 @@ class MeasureCommand extends Command<int> {
           device: device,
           onLaunchOutput: onLaunchOutput,
           flow: flow,
+          profile: profile,
         );
       } on AppLaunchException catch (e) {
         stderr.writeln(e.describe());
@@ -137,7 +153,7 @@ class MeasureCommand extends Command<int> {
     }
 
     stderr.writeln(
-      'Running $runs measurement runs on $device (debug mode), '
+      'Running $runs measurement runs on $device ($mode), '
       '${flow == null ? '${seconds}s each' : 'each driven by $flow (at most ${seconds}s)'}, '
       '${warmup.inSeconds}s warm-up...',
     );
@@ -150,6 +166,7 @@ class MeasureCommand extends Command<int> {
       onLaunchOutput: onLaunchOutput,
       onRunStart: (i, total) => stderr.writeln('Run $i/$total...'),
       flow: flow,
+      profile: profile,
     );
 
     final diagnosis = diagnoseVariance(summary);
@@ -157,7 +174,8 @@ class MeasureCommand extends Command<int> {
 
     RebuildFrameCorrelationResult? correlation;
     List<WidgetFrameImpactSummary>? widgetImpacts;
-    if (summary.validRuns.isNotEmpty) {
+    // Joining findings to rebuilds needs rebuild data, which profile builds lack.
+    if (summary.validRuns.isNotEmpty && !profile) {
       final staticFindings =
           await AnalysisEngine(allRules(), config: loadProjectConfig(targetArg))
               .analyze(targetArg);

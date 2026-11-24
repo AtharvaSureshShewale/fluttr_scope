@@ -70,12 +70,13 @@ EnvironmentMetadata detectEnvironment({
   required String device,
   String? dartVmVersion,
   Duration assumedFrameBudget = defaultFrameBudget,
+  String buildMode = 'debug',
 }) =>
     EnvironmentMetadata(
       device: device,
       looksLikeEmulator: _emulatorPattern.hasMatch(device),
       hostPlatform: '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
-      buildMode: 'debug',
+      buildMode: buildMode,
       assumedFrameBudget: assumedFrameBudget,
       dartVmVersion: dartVmVersion,
     );

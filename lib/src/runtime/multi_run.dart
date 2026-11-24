@@ -166,8 +166,12 @@ class MultiRunSummary {
         'dominantBottleneck': dominantBottleneck?.name,
         'environment': environment?.toJson(),
         if (flow != null) 'flow': flow,
-        'rebuildsPerRun': [for (final r in validRuns) r.steadyStateRebuilds],
-        'rebuildsByFilePerRun': rebuildsByFilePerRun(),
+        // A profile build can't count rebuilds: leave them out rather than
+        // report zeros.
+        if (environment?.buildMode != 'profile') ...{
+          'rebuildsPerRun': [for (final r in validRuns) r.steadyStateRebuilds],
+          'rebuildsByFilePerRun': rebuildsByFilePerRun(),
+        },
       };
 
   /// Each source file's steady-state rebuild count in each valid run, in
@@ -228,6 +232,7 @@ Future<MultiRunSummary> measureMultipleRuns({
   void Function(String line)? onLaunchOutput,
   void Function(int runIndex, int totalRuns)? onRunStart,
   String? flow,
+  bool profile = false,
 }) async {
   final validRuns = <RunAnalysis>[];
   final invalidRuns = <InvalidRun>[];
@@ -244,6 +249,7 @@ Future<MultiRunSummary> measureMultipleRuns({
         launchTimeout: launchTimeout,
         onLaunchOutput: onLaunchOutput,
         flow: flow,
+        profile: profile,
       );
       dartVmVersion ??= result.dartVmVersion;
       // Which lines ran doesn't depend on how many frames rendered, so a
@@ -307,7 +313,11 @@ Future<MultiRunSummary> measureMultipleRuns({
     captureDuration: duration,
     validRuns: validRuns,
     invalidRuns: invalidRuns,
-    environment: detectEnvironment(device: device, dartVmVersion: dartVmVersion),
+    environment: detectEnvironment(
+      device: device,
+      dartVmVersion: dartVmVersion,
+      buildMode: profile ? 'profile' : 'debug',
+    ),
     executedLines: executedLines,
     flow: flow,
   );

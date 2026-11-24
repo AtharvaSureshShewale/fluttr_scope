@@ -16,6 +16,11 @@ import 'vm_service_uri.dart';
 
 const _trackRebuildsExtension = 'ext.flutter.inspector.trackRebuildDirtyWidgets';
 
+/// Registered by the widgets binding in debug and profile builds: once it
+/// appears, the app's bindings are up. (The rebuild-tracking extension
+/// above exists only in debug builds.)
+const _profileReadyExtension = 'ext.flutter.profileWidgetBuilds';
+
 // The handshake with a flow is defined next to the helpers flows use.
 
 
@@ -61,12 +66,20 @@ class RuntimeDriver {
     Duration launchTimeout = const Duration(minutes: 5),
     void Function(String line)? onLaunchOutput,
     String? flow,
+    bool profile = false,
   }) async {
     final launchedAt = DateTime.now();
     final root = p.normalize(p.absolute(targetPath));
     final process = await Process.start(
       'flutter',
-      ['run', '-d', device, '--no-devtools', if (flow != null) ...['-t', flow]],
+      [
+        'run',
+        '-d',
+        device,
+        '--no-devtools',
+        if (profile) '--profile',
+        if (flow != null) ...['-t', flow],
+      ],
       workingDirectory: root,
       runInShell: true,
     );
@@ -117,7 +130,7 @@ class RuntimeDriver {
 
       final service = await vmServiceConnectUri(toWebSocketUri(httpUri).toString());
       try {
-        return await _measure(service, root, duration, launchedAt, flow: flow != null);
+        return await _measure(service, root, duration, launchedAt, flow: flow != null, profile: profile);
       } finally {
         await service.dispose();
       }
@@ -134,6 +147,7 @@ class RuntimeDriver {
     Duration duration,
     DateTime launchedAt, {
     required bool flow,
+    required bool profile,
   }) async {
     final vm = await service.getVM();
     final isolateId = vm.isolates!.first.id!;
@@ -143,7 +157,9 @@ class RuntimeDriver {
     // trackRebuildDirtyWidgets before that finishes throws "Unknown
     // method" — a real race that a fast/warm build reliably hits (a cold
     // build happens to be slow enough elsewhere to mask it).
-    await _waitForExtension(service, isolateId, _trackRebuildsExtension);
+    // A profile build has no rebuild tracking (it's compiled out with
+    // asserts) and no coverage, but posts the same Flutter.Frame events.
+    await _waitForExtension(service, isolateId, profile ? _profileReadyExtension : _trackRebuildsExtension);
 
     // `gc: true` forces a collection first, so this reads retained heap —
     // garbage not yet swept wouldn't tell us anything about growth.
@@ -168,11 +184,13 @@ class RuntimeDriver {
     bool? flowCompleted;
 
     try {
-      await service.callServiceExtension(
-        _trackRebuildsExtension,
-        isolateId: isolateId,
-        args: {'enabled': 'true'},
-      );
+      if (!profile) {
+        await service.callServiceExtension(
+          _trackRebuildsExtension,
+          isolateId: isolateId,
+          args: {'enabled': 'true'},
+        );
+      }
 
       if (flow) {
         // The flow waits for this call before its first action, so nothing
@@ -192,11 +210,13 @@ class RuntimeDriver {
         await Future<void>.delayed(duration);
       }
 
-      await service.callServiceExtension(
-        _trackRebuildsExtension,
-        isolateId: isolateId,
-        args: {'enabled': 'false'},
-      );
+      if (!profile) {
+        await service.callServiceExtension(
+          _trackRebuildsExtension,
+          isolateId: isolateId,
+          args: {'enabled': 'false'},
+        );
+      }
     } finally {
       await eventSub.cancel();
     }
@@ -206,7 +226,7 @@ class RuntimeDriver {
     // Collected last: forceCompile compiles every app function, which
     // would otherwise land inside the measured window as jank.
     final packageName = readPackageName(root);
-    final executedLines = packageName == null
+    final executedLines = packageName == null || profile
         ? null
         : await collectExecutedLines(service, isolateId, packageName: packageName);
 
