@@ -158,8 +158,9 @@ String dashboard({required int passed, required int total}) {
     <g font-size="13.5" fill="#c9d1d9">
       <text x="300" y="74">▸  <tspan font-weight="700" fill="#e6edf3">$dartRules</tspan> Dart rules + <tspan font-weight="700" fill="#e6edf3">$fileChecks</tspan> file checks</text>
       <text x="300" y="98">▸  <tspan font-weight="700" fill="#e6edf3">6</tspan> commands: analyze, security,</text>
-      <text x="322" y="116">measure, prioritize, correlate, compare</text>
-      <text x="300" y="140">▸  <tspan font-weight="700" fill="#e6edf3">$passed</tspan> tests passing</text>
+      <text x="322" y="116">measure, prioritize,</text>
+      <text x="322" y="134">correlate, compare</text>
+      <text x="300" y="158">▸  <tspan font-weight="700" fill="#e6edf3">$passed</tspan> tests passing</text>
       <text x="510" y="74">▸  <tspan font-weight="700" fill="#e6edf3">8</tspan> real apps audited</text>
       <text x="510" y="98">▸  CI: Flutter 3.35.2 + stable</text>
       <text x="510" y="122">▸  live CVE lookup (OSV.dev)</text>
@@ -234,7 +235,7 @@ ${findingBars()}      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="3
       <circle cx="728" cy="330" r="6" fill="none" stroke="#8b949e" stroke-width="1.5"/><text x="744" y="335">No runtime signal (config, constants)</text>
     </g>
     <text x="720" y="366" font-size="12.5" fill="#8b949e">On Wonderous, a setState listener ranked 🔥 first;</text>
-    <text x="720" y="384" font-size="12.5" fill="#8b949e">the fix cut rebuilds 38% (same flow, 3 runs each).</text>
+    <text x="720" y="384" font-size="12.5" fill="#8b949e">the fix cut rebuilds 23% (same flow, 5 runs each).</text>
 
     <!-- Roadmap -->
     <text x="720" y="428" font-size="15" font-weight="600" fill="#58a6ff">Roadmap</text>
