@@ -8,6 +8,7 @@ import '../coverage/file_coverage.dart';
 import '../coverage/lcov_parser.dart';
 import '../dependency/dependency_audit.dart';
 import '../dependency/osv_client.dart';
+import '../fix/fixer.dart';
 import '../model/finding.dart';
 import '../model/severity.dart';
 import '../report/json_report.dart';
@@ -61,6 +62,17 @@ class AnalyzeCommand extends Command<int> {
         'write-baseline',
         negatable: false,
         help: 'Record every current finding to the baseline file and exit 0.',
+      )
+      ..addFlag(
+        'fix',
+        negatable: false,
+        help: 'Apply the fixes that are safe to make automatically, then report '
+            'what is left. A file is only changed if it still compiles.',
+      )
+      ..addFlag(
+        'dry-run',
+        negatable: false,
+        help: 'With --fix: show the changes instead of making them.',
       );
   }
 
@@ -71,6 +83,23 @@ class AnalyzeCommand extends Command<int> {
     final engine = AnalysisEngine(allRules(), config: config);
 
     var findings = await engine.analyze(targetArg);
+
+    final fix = argResults!['fix'] as bool;
+    final dryRun = argResults!['dry-run'] as bool;
+    if (dryRun && !fix) usageException('--dry-run only works with --fix.');
+    if (fix) {
+      final plan = await planFixes(targetArg, findings);
+      if (dryRun) {
+        for (final file in plan.files) {
+          stdout.write(describeFileFix(file));
+        }
+        _reportFixPlan(plan, dryRun: true);
+        return 0;
+      }
+      await writeFixes(targetArg, plan);
+      _reportFixPlan(plan, dryRun: false);
+      if (plan.files.isNotEmpty) findings = await engine.analyze(targetArg);
+    }
 
     if (argResults!['dependency-audit'] as bool) {
       try {
@@ -127,6 +156,18 @@ class AnalyzeCommand extends Command<int> {
       fatalWarnings: argResults!['fatal-warnings'] as bool,
       fatalInfos: argResults!['fatal-infos'] as bool,
     );
+  }
+}
+
+void _reportFixPlan(FixPlan plan, {required bool dryRun}) {
+  if (plan.files.isEmpty && plan.skipped.isEmpty) {
+    stderr.writeln('Nothing to fix automatically.');
+    return;
+  }
+  final verb = dryRun ? 'Would fix' : 'Fixed';
+  stderr.writeln('$verb ${plan.fixCount} finding(s) in ${plan.files.length} file(s).');
+  for (final skipped in plan.skipped) {
+    stderr.writeln('Skipped ${skipped.file} (${skipped.fixCount} fix(es)): ${skipped.reason}.');
   }
 }
 

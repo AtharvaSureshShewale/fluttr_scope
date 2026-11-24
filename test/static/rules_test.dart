@@ -78,6 +78,19 @@ void main() {
     );
   });
 
+  test('missing_const_constructor fixes only the outermost of nested widgets', () {
+    // `Padding(child: Text('x'))`: making Padding const makes Text const
+    // too, so only Padding gets a fix.
+    final all = findings.where((f) => f.ruleId == 'missing_const_constructor').toList();
+    final withFix = all.where((f) => f.fix != null).toList();
+    expect(withFix, isNotEmpty);
+    expect(withFix.length, lessThan(all.length));
+    for (final f in withFix) {
+      final edit = f.fix!.edits.single;
+      expect(edit.replacement, anyOf('const ', 'const'));
+    }
+  });
+
   test('dispose_missing flags a controller field never disposed', () {
     final matches = inFile('dispose_missing', 'main.dart');
     expect(matches, hasLength(1));
@@ -309,6 +322,18 @@ void main() {
       expect(key.evidenceLocations.any((l) => l.line == columnLine && l.column == columnCol), isTrue);
       expect(at('missing_const_constructor', 'return SizedBox.expand();').evidenceLocations, isEmpty);
       expect(at('missing_const_constructor', 'child ?? SizedBox.shrink();').evidenceLocations, isEmpty);
+    });
+
+    test('fixes replace the whole lookup, keeping the argument as written', () {
+      const file = 'animation_rebuild_examples.dart';
+      final source = File(p.join(sampleAppRoot, 'lib', file)).readAsStringSync();
+      final replaced = {
+        for (final f in inFile('media_query_of_single_property', file))
+          for (final e in f.fix!.edits) source.substring(e.offset, e.end): e.replacement,
+      };
+      expect(replaced['MediaQuery.of(context).size.width'], 'MediaQuery.widthOf(context)');
+      expect(replaced['MediaQuery.of(context).viewInsets'], 'MediaQuery.viewInsetsOf(context)');
+      expect(replaced['MediaQuery.maybeOf(context)?.size'], 'MediaQuery.maybeSizeOf(context)');
     });
 
     test('suggests the narrowest lookup', () {
@@ -831,6 +856,15 @@ void main() {
 
   group('false-positive regressions (negative_examples.dart)', () {
     const file = 'negative_examples.dart';
+
+    test('missing_const_constructor does not flag a widget typed by a type parameter', () {
+      for (final needle in ['generic box inferred', 'generic box explicit']) {
+        final (line, _) = locate(needle, relativeFile: file);
+        expect(inFile('missing_const_constructor', file).where((f) => f.location.line == line),
+            isEmpty,
+            reason: needle);
+      }
+    });
 
     test('unbounded_scrollable_in_flex does not flag a ListView wrapped in Expanded', () {
       expect(inFile('unbounded_scrollable_in_flex', file), isEmpty);

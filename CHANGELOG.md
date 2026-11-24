@@ -1,3 +1,20 @@
+## 0.4.0
+
+- **`analyze --fix`**: applies the fixes that can't change what the app
+  does, then reports what's left; `--fix --dry-run` shows the diff instead.
+  Covers `missing_const_constructor` (adds `const`, only on the outermost
+  of nested widgets) and `media_query_of_single_property`
+  (`MediaQuery.of(context).size.width` → `MediaQuery.widthOf(context)`).
+  Each changed file is analyzed again first and left alone if the fixes
+  would add a compile error (e.g. `const Opacity(opacity: 1.5)`, which
+  fails Flutter's asserts at compile time). On Wonderous: 75 findings fixed
+  in 39 files, `dart analyze` output unchanged.
+- `Fix` has `edits` (offset, length, replacement), included in the JSON
+  report as `fix.edits`.
+- **Fix:** `missing_const_constructor` no longer flags a widget whose type
+  argument is a type parameter (`Box<T>()`), or one passed a record
+  literal; neither can be `const`.
+
 ## 0.3.1
 
 - **Flows no longer need `--seconds`.** With `--flow`, `--seconds` is only

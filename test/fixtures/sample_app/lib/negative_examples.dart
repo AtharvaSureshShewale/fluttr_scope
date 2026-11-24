@@ -114,3 +114,22 @@ class ListKeyPresentExample extends StatelessWidget {
     );
   }
 }
+
+// missing_const_constructor: `const GenericBox<T>()` doesn't compile -- T
+// is a type parameter -- so neither use below may be flagged.
+class GenericBox<T> extends StatelessWidget {
+  const GenericBox({super.key});
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
+class GenericHolder<T> extends StatelessWidget {
+  const GenericHolder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final GenericBox<T> inferred = GenericBox(); // generic box inferred
+    return Column(children: [GenericBox<T>(), inferred]); // generic box explicit
+  }
+}

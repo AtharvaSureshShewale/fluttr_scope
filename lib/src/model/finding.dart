@@ -18,15 +18,38 @@ class Evidence {
   Map<String, Object?> toJson() => {'rebuildCount': rebuildCount};
 }
 
+/// One text replacement in the finding's file: [length] characters at
+/// [offset] (0-based, in the file as analyzed) become [replacement].
+class SourceEdit {
+  final int offset;
+  final int length;
+  final String replacement;
+
+  const SourceEdit({required this.offset, required this.length, required this.replacement});
+
+  int get end => offset + length;
+
+  Map<String, Object?> toJson() => {
+        'offset': offset,
+        'length': length,
+        'replacement': replacement,
+      };
+}
+
 class Fix {
   final String kind;
   final String description;
 
-  const Fix({required this.kind, required this.description});
+  /// The edits that make this fix, all in the finding's file. Empty when the
+  /// fix needs a human (`analyze --fix` only applies fixes that have edits).
+  final List<SourceEdit> edits;
+
+  const Fix({required this.kind, required this.description, this.edits = const []});
 
   Map<String, Object?> toJson() => {
         'kind': kind,
         'description': description,
+        if (edits.isNotEmpty) 'edits': [for (final e in edits) e.toJson()],
       };
 }
 

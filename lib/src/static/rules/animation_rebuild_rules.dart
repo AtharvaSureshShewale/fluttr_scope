@@ -55,7 +55,7 @@ class MediaQueryOfSinglePropertyRule extends StaticRule {
   List<Finding> check(ResolvedUnitResult unit, RuleContext context) {
     if (isTestFile(unit, context)) return const [];
     final findings = <Finding>[];
-    unit.unit.accept(_MediaQueryVisitor((node, property, replacement) {
+    unit.unit.accept(_MediaQueryVisitor((node, property, replacement, replaced) {
       // The keyboard is the usual culprit, unless the keyboard's insets are
       // the very value being read.
       final example = property == 'viewInsets'
@@ -71,6 +71,18 @@ class MediaQueryOfSinglePropertyRule extends StaticRule {
             'when it changes.',
         location: locationOf(unit, node, context),
         evidenceLocations: rerunEvidence(unit, node, context),
+        fix: Fix(
+          kind: 'replace',
+          description: 'Use `MediaQuery.$replacement(context)`',
+          edits: [
+            SourceEdit(
+              offset: replaced.offset,
+              length: replaced.length,
+              replacement: 'MediaQuery.$replacement'
+                  '${unit.content.substring(node.argumentList.offset, node.argumentList.end)}',
+            ),
+          ],
+        ),
       ));
     }));
     return findings;
@@ -78,7 +90,14 @@ class MediaQueryOfSinglePropertyRule extends StaticRule {
 }
 
 class _MediaQueryVisitor extends RecursiveAstVisitor<void> {
-  final void Function(MethodInvocation node, String property, String replacement) onMatch;
+  /// [replaced] is the whole expression the lookup replaces:
+  /// `MediaQuery.of(context).size` or `MediaQuery.of(context).size.width`.
+  final void Function(
+    MethodInvocation node,
+    String property,
+    String replacement,
+    Expression replaced,
+  ) onMatch;
 
   _MediaQueryVisitor(this.onMatch);
 
@@ -107,19 +126,21 @@ class _MediaQueryVisitor extends RecursiveAstVisitor<void> {
 
     // `.size.width` / `.size.height` have lookups of their own.
     var shown = property;
+    Expression replaced = access;
     final outer = access.parent;
     if (property == 'size' && outer is PropertyAccess && outer.target == access) {
       final dimension = outer.propertyName.name;
       if (dimension == 'width' || dimension == 'height') {
         lookup = '${dimension}Of';
         shown = 'size.$dimension';
+        replaced = outer;
       }
     }
 
     if (method == 'maybeOf') {
       lookup = 'maybe${lookup[0].toUpperCase()}${lookup.substring(1)}';
     }
-    onMatch(node, shown, lookup);
+    onMatch(node, shown, lookup, replaced);
   }
 }
 
