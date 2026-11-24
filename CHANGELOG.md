@@ -1,4 +1,18 @@
-## 0.6.0 (unreleased)
+## 0.6.0
+
+- **`measure --profile`**: frame timings from a profile build, close to
+  what users see. Physical devices only (emulators can't run profile
+  builds). Rebuild counts and coverage exist only in debug builds, so they
+  are left out of a profile measurement's JSON; `compare` warns when one
+  side is debug and the other profile.
+- **Measured on a real phone** (moto g34): the Wonderous listener fix cut
+  frames over budget from 14.6% to 11.8% (every run after beat every run
+  before) and rebuilds by 23%, in a debug build. In a profile build the
+  phone was already smooth (0.1% of frames over budget, slowest 18 ms)
+  with no clear change: the fix removes wasted work, but users of this
+  phone wouldn't notice.
+- The 13 rules never seen on a real app also stayed silent on 32 more
+  (Flutter's sample apps): no false alarms, still no real-world hits.
 
 - **HTML reports**: `--format html` on `analyze`, `prioritize` and
   `compare` writes one self-contained page (no scripts, no network; light

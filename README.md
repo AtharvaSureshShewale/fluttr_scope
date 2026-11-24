@@ -122,8 +122,9 @@ the real code that fooled it.
 - Rules favour precision over recall: when a rule can't be sure, it stays
   quiet rather than guess.
 
-These 13 rules never fired on any of the eight apps, so they're tested only
-against small examples so far (most catch crashes that rarely survive into
+These 13 rules never fired on any of the eight apps, nor on 32 more checked in
+November 2026 (Flutter's own sample apps), so they're tested only against
+small examples so far. No false alarms either (most catch crashes that rarely survive into
 committed code): `bottom_navigation_bar_too_few_items`,
 `container_color_and_decoration_conflict`, `flex_value_non_positive`,
 `inherited_widget_of_in_initstate`, `insecure_certificate_validation`,
@@ -282,6 +283,13 @@ to the static performance findings:
 `--device` can be omitted when exactly one device is connected.
 `--technical` prints the raw report instead of the plain-language one.
 
+`--profile` builds the app in profile mode, for frame timings close to what
+users see (debug builds are much slower). It needs a physical device, since
+emulators can't run profile builds. Rebuild counts and line coverage exist
+only in debug builds, so a profile measurement has frame timing only:
+measure rebuilds in debug mode, speed in profile mode. `compare` warns if
+you compare one against the other.
+
 </details>
 
 <details>
@@ -311,8 +319,24 @@ flows, or different devices.
 | `--out <file>` | stdout | Write the report to a file |
 | `--fail-on-regression` | | Exit 1 if frame timing or total rebuilds got clearly worse (for CI) |
 
-On Wonderous, before and after the `setState`-in-listener fix (same flow,
-5 runs each, Android emulator):
+On a real phone (moto g34, debug build), Wonderous before and after the
+`setState`-in-listener fix, same flow, 5 runs each:
+
+```text
+Metric                        Before       After  Change
+Frames over budget             14.6%       11.8%  ✅ better (-19%)
+Slowest frame                62.2 ms     85.2 ms  no clear change (+37%)
+Jank clusters                     14           7  no clear change (-50%)
+Rebuilds (after warm-up)      27,987      21,624  ✅ better (-23%)
+```
+
+On the phone, every run after the fix had fewer slow frames than every run
+before it, in a debug build. In a profile build (`measure --profile`, close
+to what users get) the same phone was already smooth before the fix: 0.1%
+of frames over budget, slowest frame 18 ms, with no clear change after it.
+So the fix removes wasted work, but on this phone users wouldn't see a
+difference; most of the debug build's slow frames were debug overhead. On the Android emulator (same flow, 5 runs each) the rebuilds
+fell just as much, but frame timing stayed within the emulator's noise:
 
 ```text
 Metric                        Before       After  Change
@@ -331,7 +355,8 @@ REBUILDS BY FILE (changed by more than the runs vary, and by 10% or more)
 The fix did what it was meant to: whole illustrations stopped rebuilding
 every frame, and the work moved into the small pieces that actually move.
 Frame timing didn't clearly change on the emulator: the slowest frame's
-median fell 32%, but the runs overlap. With 3 runs a side, jank clusters
+median fell 32%, but the runs overlap. Measure frame timing on a real
+device. With 3 runs a side, jank clusters
 had come out "worse"; with 5 they're within noise, which is why `compare`
 suggests re-measuring a surprising 3-run result.
 
@@ -373,7 +398,7 @@ Add the two packages it needs:
 dev_dependencies:
   integration_test:
     sdk: flutter
-  fluttr_scope: ^0.5.0
+  fluttr_scope: ^0.6.0
 ```
 
 Then mark where the measured session starts and ends:
