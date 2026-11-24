@@ -5,7 +5,7 @@
   builds). Rebuild counts and coverage exist only in debug builds, so they
   are left out of a profile measurement's JSON; `compare` warns when one
   side is debug and the other profile.
-- **Measured on a real phone** (moto g34): the Wonderous listener fix cut
+- **Measured on a real Android phone**: the Wonderous listener fix cut
   frames over budget from 14.6% to 11.8% (every run after beat every run
   before) and rebuilds by 23%, in a debug build. In a profile build the
   phone was already smooth (0.1% of frames over budget, slowest 18 ms)

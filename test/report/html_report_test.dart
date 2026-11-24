@@ -4,6 +4,7 @@ import 'package:fluttr_scope/src/model/finding.dart';
 import 'package:fluttr_scope/src/model/severity.dart';
 import 'package:fluttr_scope/src/model/source_location.dart';
 import 'package:fluttr_scope/src/report/html_report.dart';
+import 'package:fluttr_scope/src/triage/triage_report.dart';
 import 'package:test/test.dart';
 
 Finding _finding(String ruleId, int line, {String message = 'Use `const`.', Fix? fix}) => Finding(
@@ -52,6 +53,24 @@ void main() {
 
     final other = htmlFindingsReport([_finding('missing_const_constructor', 3)], sourceLines: (_) => _source);
     expect(other, contains('dxqHsX7I0URA5hfh'));
+  });
+
+  test('hides a physical device serial number, keeps emulator names', () {
+    String measuredOn(String device) => htmlTriageReport(
+          const [],
+          TriageContext(
+            device: device,
+            validRuns: 3,
+            requestedRuns: 3,
+            captureDuration: Duration(seconds: 60),
+            warmup: Duration.zero,
+            overallConfidence: null,
+          ),
+          sourceLines: (_) => null,
+        );
+    expect(measuredOn('ZA222JYM37'), isNot(contains('ZA222JYM37')));
+    expect(measuredOn('ZA222JYM37'), contains('a physical device'));
+    expect(measuredOn('emulator-5554'), contains('emulator-5554'));
   });
 
   test('marks findings --fix can fix', () {

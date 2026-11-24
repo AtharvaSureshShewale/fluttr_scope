@@ -27,7 +27,7 @@ String htmlTriageReport(
           '${context.captureDuration.inSeconds}s'
       : '${context.validRuns} of ${context.requestedRuns} run(s) driven by '
           '<code>${_e(context.flow!)}</code>';
-  body.writeln('<p class="meta">Measured $how on <code>${_e(context.device)}</code>, debug mode'
+  body.writeln('<p class="meta">Measured $how on ${_deviceLabel(context.device)}, debug mode'
       '${context.overallConfidence == null ? '' : ' · frame-timing confidence '
           '<b>${context.overallConfidence!.name}</b>'}</p>');
 
@@ -159,6 +159,15 @@ String htmlComparisonReport(Comparison comparison, {int maxFiles = 15}) {
   body.writeln('<p class="note">"Better" or "worse" means every run after beat (or lost to) '
       'every run before. Anything else is "no clear change": it could be noise.</p>');
   return _page('Before vs after', body.toString());
+}
+
+/// Emulators and desktop/web targets by name; a physical device without
+/// its ID, which is a serial number unique to that phone (reports are made
+/// to be shared).
+String _deviceLabel(String device) {
+  final named = RegExp(r'emulator|simulator|^(windows|macos|linux|chrome|edge|web-server)$',
+      caseSensitive: false);
+  return named.hasMatch(device) ? '<code>${_e(device)}</code>' : 'a physical device';
 }
 
 String _impactText(TriagedFinding t) {

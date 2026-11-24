@@ -319,7 +319,7 @@ flows, or different devices.
 | `--out <file>` | stdout | Write the report to a file |
 | `--fail-on-regression` | | Exit 1 if frame timing or total rebuilds got clearly worse (for CI) |
 
-On a real phone (moto g34, debug build), Wonderous before and after the
+On a real Android phone (debug build), Wonderous before and after the
 `setState`-in-listener fix, same flow, 5 runs each:
 
 ```text
