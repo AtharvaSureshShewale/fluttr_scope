@@ -12,6 +12,11 @@
 - **analyzer 11 and 12** are now allowed (`>=10.0.1 <13.0.0`; the full
   test suite passes on 10, 11 and 12), so fluttr_scope installs in apps on
   newer Flutter versions too. Flutter 3.35 apps still get analyzer 10.
+- **Fix:** `empty_container_instead_of_sizedbox` suggested `SizedBox()`,
+  which isn't equivalent: an empty `Container()` fills the space its
+  parent allows, a bare `SizedBox()` takes none. On Wonderous, following it
+  would have shrunk a screen reader's focus area to nothing. It now
+  suggests `const SizedBox.expand()` or `const SizedBox.shrink()`.
 
 ## 0.4.0
 

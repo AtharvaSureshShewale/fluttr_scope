@@ -9,10 +9,14 @@ import '../../model/severity.dart';
 import '../flutter_ast.dart';
 import '../rule.dart';
 
-/// Flags an empty `Container()` used purely for spacing. `SizedBox` has
-/// far less overhead (`Container` resolves decoration, padding, margin,
-/// and alignment even when none are set) and is the idiomatic choice when
-/// none of that is needed.
+/// Flags an empty `Container()`. It builds two widgets (`LimitedBox` and
+/// `ConstrainedBox`) and can't be `const`; a `SizedBox` builds one and can.
+///
+/// The swap isn't one-for-one, so the message says which to use: an empty
+/// `Container()` fills all the space its parent allows (none where that
+/// space is unbounded). A bare `SizedBox()` takes none, so swapping it in
+/// can change layout -- on Wonderous, an empty `Container()` under a
+/// `Semantics` label sized the area a screen reader highlights.
 class EmptyContainerInsteadOfSizedboxRule extends StaticRule {
   @override
   String get id => 'empty_container_instead_of_sizedbox';
@@ -29,8 +33,11 @@ class EmptyContainerInsteadOfSizedboxRule extends StaticRule {
           ruleId: id,
           category: Category.performance,
           severity: Severity.info,
-          message: 'An empty `Container()` has more overhead than '
-              '`SizedBox()` for pure spacing.',
+          message: 'An empty `Container()` fills all the space its parent allows, '
+              'and cannot be `const`. To fill that space, use `const SizedBox.expand()` '
+              '(where the space is bounded); for an empty placeholder, '
+              '`const SizedBox.shrink()`. A bare `SizedBox()` takes no space, so it '
+              'can change layout.',
           location: locationOf(unit, node, context),
         ));
       }

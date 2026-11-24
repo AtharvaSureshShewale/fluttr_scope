@@ -539,7 +539,7 @@ directly.
 | `dispose_missing` | warning | A controller / subscription the `State` creates but `dispose()` never releases |
 | **`setstate_in_list_builder`** | info | `setState` inside an `itemBuilder`, which rebuilds the whole list on every tap |
 | `shrinkwrap_listview` | info | `shrinkWrap: true` on a scrollable |
-| `empty_container_instead_of_sizedbox` | info | An empty `Container()` used for spacing |
+| `empty_container_instead_of_sizedbox` | info | An empty `Container()`; says whether `SizedBox.expand()` or `.shrink()` keeps the layout |
 | **`widget_returning_method`** | info | A method on a widget / `State` returning `Widget` instead of a widget class |
 | **`setstate_in_animation_listener`** | warning | `setState` in an animation's listener, which rebuilds the whole widget on every frame |
 | **`opacity_in_animation`** | info | `Opacity(opacity: animation.value)`, which rebuilds its child every frame; `FadeTransition` doesn't |
