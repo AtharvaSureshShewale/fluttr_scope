@@ -419,7 +419,9 @@ String formatMultiRunReport(MultiRunSummary summary) {
     '(${summary.validRuns.length} valid, ${summary.invalidRuns.length} invalid)',
   );
   buffer.writeln('Warm-up: ${summary.warmup.inSeconds}s');
-  buffer.writeln('Measurement: ${summary.captureDuration.inSeconds}s');
+  buffer.writeln(summary.flow == null
+      ? 'Measurement: ${summary.captureDuration.inSeconds}s'
+      : 'Measurement: until the flow finished (limit ${summary.captureDuration.inSeconds}s)');
 
   if (summary.invalidRuns.isNotEmpty) {
     buffer.writeln();

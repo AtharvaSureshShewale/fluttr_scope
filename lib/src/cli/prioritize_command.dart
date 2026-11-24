@@ -15,6 +15,7 @@ import '../static/all_rules.dart';
 import '../static/engine.dart';
 import '../triage/triage.dart';
 import '../triage/triage_report.dart';
+import 'capture_seconds.dart';
 import 'load_config.dart';
 
 class PrioritizeCommand extends Command<int> {
@@ -31,8 +32,9 @@ class PrioritizeCommand extends Command<int> {
         'device',
         help: 'flutter run -d <device>. If omitted, the only connected device is used.',
       )
-      ..addOption('runs', defaultsTo: '3', help: 'Number of app launches to measure.')
-      ..addOption('seconds', defaultsTo: '15', help: 'How long to capture each run for.')
+      ..addOption('runs', defaultsTo: '3', help: 'Number of app launches to measure.');
+    addSecondsOption(argParser, fixedDefault: 15);
+    argParser
       ..addOption(
         'warmup',
         defaultsTo: '2',
@@ -50,7 +52,7 @@ class PrioritizeCommand extends Command<int> {
         help: 'An integration_test file that drives the app during each run '
             '(e.g. integration_test/flow_test.dart), so every run does the same '
             'thing. Recording starts when the flow is ready and stops when it '
-            'finishes; --seconds becomes the time limit. See README.',
+            'finishes; --seconds becomes the time limit (default 300s). See README.',
       )
       ..addFlag('all', negatable: false, help: 'Also list info-level findings.')
       ..addFlag(
@@ -66,7 +68,8 @@ class PrioritizeCommand extends Command<int> {
     final targetArg = argResults!.rest.isEmpty ? '.' : argResults!.rest.first;
     final root = p.normalize(p.absolute(targetArg));
     final runs = int.parse(argResults!['runs'] as String);
-    final seconds = Duration(seconds: int.parse(argResults!['seconds'] as String));
+    final seconds = Duration(seconds: captureSeconds(argResults!, fixedDefault: 15));
+    final flow = argResults!['flow'] as String?;
     final warmup = Duration(seconds: int.parse(argResults!['warmup'] as String));
 
     final String device;
@@ -78,8 +81,9 @@ class PrioritizeCommand extends Command<int> {
     }
 
     final findings = await _staticFindings(targetArg);
-    stderr.writeln('${findings.length} static finding(s). Measuring $runs run(s) of '
-        '${seconds.inSeconds}s on $device (debug mode)...');
+    stderr.writeln('${findings.length} static finding(s). Measuring $runs run(s) '
+        '${flow == null ? 'of ${seconds.inSeconds}s' : 'of $flow (at most ${seconds.inSeconds}s each)'} '
+        'on $device (debug mode)...');
 
     final summary = await measureMultipleRuns(
       targetPath: targetArg,
@@ -90,7 +94,7 @@ class PrioritizeCommand extends Command<int> {
       onLaunchOutput:
           argResults!['verbose'] as bool ? (line) => stderr.writeln('  $line') : null,
       onRunStart: (i, total) => stderr.writeln('Run $i/$total...'),
-      flow: argResults!['flow'] as String?,
+      flow: flow,
     );
     for (final invalid in summary.invalidRuns) {
       stderr.writeln('warning: run #${invalid.runIndex} invalid: ${invalid.reason}');

@@ -1,3 +1,17 @@
+## 0.3.1
+
+- **Flows no longer need `--seconds`.** With `--flow`, `--seconds` is only
+  a time limit (recording stops when the flow finishes), but it defaulted to
+  15s (`prioritize`) or 10s (`measure`), and since 0.3.0 a run whose flow
+  hits the limit is discarded. So any flow longer than that, as most real
+  ones are, gave 0 valid runs unless you raised `--seconds`, which the
+  README examples didn't. With `--flow` the default is now 300s. Without a
+  flow, the defaults are unchanged.
+- Reports from a flow say "until the flow finished (limit Ns)" instead of
+  showing the time limit as if it were the measured time.
+- **README:** the install snippet said `^0.2.0`; a test now keeps it in
+  step with `pubspec.yaml`.
+
 ## 0.3.0
 
 - **3 new performance rules**, each checked by hand on real apps

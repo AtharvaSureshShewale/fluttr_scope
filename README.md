@@ -297,7 +297,7 @@ Add the two packages it needs:
 dev_dependencies:
   integration_test:
     sdk: flutter
-  fluttr_scope: ^0.2.0
+  fluttr_scope: ^0.3.1
 ```
 
 Then mark where the measured session starts and ends:
@@ -327,9 +327,11 @@ void main() {
 }
 ```
 
-`--seconds` becomes a time limit: recording stops as soon as the flow
-calls `fluttrScopeDone()`. Outside fluttr_scope (a plain `flutter test`)
-both calls are harmless, so the same file still works as a normal test.
+Recording stops as soon as the flow calls `fluttrScopeDone()`, so with a
+flow `--seconds` is only a time limit, in case the flow hangs. It defaults
+to 300s; a run whose flow takes longer is discarded, so raise it for a
+longer flow. Outside fluttr_scope (a plain `flutter test`) both calls are
+harmless, so the same file still works as a normal test.
 
 A flow makes the *actions* identical every run. Rebuilds driven by
 animations happen once per frame, though, so their count still follows the

@@ -340,7 +340,9 @@ String formatDeveloperFindingsReport(UnifiedFindingsReport report) {
   buffer.writeln();
   buffer.writeln('Runs: ${report.totalRuns}');
   buffer.writeln('Warm-up: ${report.warmup.inSeconds}s');
-  buffer.writeln('Steady-state: ${report.steadyStateDuration.inSeconds}s');
+  buffer.writeln(report.flow == null
+      ? 'Steady-state: ${report.steadyStateDuration.inSeconds}s'
+      : 'Steady-state: until the flow finished (limit ${report.steadyStateDuration.inSeconds}s)');
   buffer.writeln();
   final (overallIcon, _) = severityPresentation(
     report.overallConfidence == Confidence.high

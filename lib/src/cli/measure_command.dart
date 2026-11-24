@@ -15,6 +15,7 @@ import '../runtime/unified_finding.dart';
 import '../runtime/variance_diagnosis.dart';
 import '../static/all_rules.dart';
 import '../static/engine.dart';
+import 'capture_seconds.dart';
 import 'format_bytes.dart';
 import 'load_config.dart';
 
@@ -29,12 +30,8 @@ class MeasureCommand extends Command<int> {
       'retained-heap growth.';
 
   MeasureCommand() {
+    addSecondsOption(argParser, fixedDefault: 10);
     argParser
-      ..addOption(
-        'seconds',
-        defaultsTo: '10',
-        help: 'How long to capture rebuilds for.',
-      )
       ..addOption(
         'device',
         help: 'flutter run -d <device>. If omitted, the only connected device '
@@ -52,7 +49,7 @@ class MeasureCommand extends Command<int> {
         help: 'An integration_test file that drives the app during each run '
             '(e.g. integration_test/flow_test.dart), so every run does the same '
             'thing. Recording starts when the flow is ready and stops when it '
-            'finishes; --seconds becomes the time limit. See README.',
+            'finishes; --seconds becomes the time limit (default 300s). See README.',
       )
       ..addOption(
         'runs',
@@ -90,7 +87,7 @@ class MeasureCommand extends Command<int> {
   @override
   Future<int> run() async {
     final targetArg = argResults!.rest.isEmpty ? '.' : argResults!.rest.first;
-    final seconds = int.parse(argResults!['seconds'] as String);
+    final seconds = captureSeconds(argResults!, fixedDefault: 10);
     final String device;
     try {
       device = (argResults!['device'] as String?) ?? await detectDevice();
@@ -141,7 +138,8 @@ class MeasureCommand extends Command<int> {
 
     stderr.writeln(
       'Running $runs measurement runs on $device (debug mode), '
-      '${seconds}s each, ${warmup.inSeconds}s warm-up...',
+      '${flow == null ? '${seconds}s each' : 'each driven by $flow (at most ${seconds}s)'}, '
+      '${warmup.inSeconds}s warm-up...',
     );
     final summary = await measureMultipleRuns(
       targetPath: targetArg,
