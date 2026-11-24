@@ -9,6 +9,9 @@
   `--fail-on-regression` exits 1 when frame timing or rebuilds got worse.
 - `measure --format json` now includes `rebuildsPerRun` and
   `rebuildsByFilePerRun` (steady-state rebuilds in each valid run).
+- **analyzer 11 and 12** are now allowed (`>=10.0.1 <13.0.0`; the full
+  test suite passes on 10, 11 and 12), so fluttr_scope installs in apps on
+  newer Flutter versions too. Flutter 3.35 apps still get analyzer 10.
 
 ## 0.4.0
 

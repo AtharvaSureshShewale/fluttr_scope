@@ -24,7 +24,7 @@ false_secrets:
   - /test/static/hardcoded_secret_pattern_test.dart
 
 dependencies:
-  analyzer: ^10.0.1
+  analyzer: ">=10.0.1 <13.0.0"
   args: ^2.5.0
   path: ^1.9.0
   glob: ^2.1.2
