@@ -86,17 +86,21 @@ rebuilds every illustration on every animation frame, though that `build` only
 checks whether the animation is at 0. The fix: each
 [illustration piece](https://github.com/gskinnerTeam/flutter-wonderous-app/blob/d30aee040e16b56c535f50588dc3e7b36a18f862/lib/ui/wonder_illustrations/common/illustration_piece.dart#L86)
 animates itself with an `AnimatedBuilder`, and the listener calls `setState`
-only when "at 0" changes (16 changed lines). Measured again, same flow, 3 runs:
+only when "at 0" changes (16 changed lines). Then [`compare`](#commands) measured
+it before and after, same flow, **5 runs each, on a real Android phone and on an
+emulator**:
 
-| Per run (median) | Before | After |
-|---|---|---|
-| Widget rebuilds | ~28,500 | ~17,500 (**−38%**) |
-| One illustration piece's rebuilds | 109 | 12 (**−89%**) |
-| Slowest frame | 167 ms | 79 ms |
-| Frames over budget | 16.5% | 20.0% |
+| Before → after (median of 5 runs) | Real phone, debug | Real phone, profile | Emulator, debug |
+|---|---|---|---|
+| Widget rebuilds | 27,987 → 21,624 ✅ **−23%** | not counted in profile builds | 29,385 → 22,729 ✅ **−23%** |
+| Frames over budget | 14.6% → 11.8% ✅ **−19%** | 0.1% → 0% (no clear change) | 17.2% → 19.6% (no clear change) |
+| Slowest frame | 62 → 85 ms (no clear change) | 18 → 16 ms (no clear change) | 85 → 58 ms (no clear change) |
 
-The share of slow frames didn't drop: in debug mode on an emulator, frame time
-is dominated by other costs. That's why fluttr_scope reports rebuilds during slow
+✅ means every run after the fix beat every run before it. On the real phone the
+fix cut slow frames in a debug build. In a profile build, which is close to what
+users get, the phone was already smooth, so its users wouldn't notice: the fix
+removes wasted work rather than visible lag on this phone. On the emulator, frame
+timing stayed within noise. That's why fluttr_scope reports rebuilds during slow
 frames as an association, never as proof that fixing them speeds the app up.
 (Measured on commit `d30aee0`: the newest commit doesn't build for Android.)
 
@@ -117,6 +121,8 @@ the real code that fooled it.
 - Real-app testing caught bugs that no unit test had: for example, runtime
   evidence never reached `Image.asset(...)` widgets, because Flutter records a
   named constructor 6 columns later than where the finding pointed.
+- Runtime measurements were taken on an Android emulator **and a real Android
+  phone**, in debug and profile builds.
 - Hundreds of automated tests (the dashboard shows today's count). CI checks Flutter 3.35.2 and the latest stable,
   including installing the package into a fresh Flutter app.
 - Rules favour precision over recall: when a rule can't be sure, it stays
@@ -398,7 +404,7 @@ Add the two packages it needs:
 dev_dependencies:
   integration_test:
     sdk: flutter
-  fluttr_scope: ^0.6.0
+  fluttr_scope: ^0.6.1
 ```
 
 Then mark where the measured session starts and ends:

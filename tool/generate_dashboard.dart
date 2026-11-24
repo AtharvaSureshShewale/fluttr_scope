@@ -235,19 +235,19 @@ ${findingBars()}      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="3
       <circle cx="728" cy="330" r="6" fill="none" stroke="#8b949e" stroke-width="1.5"/><text x="744" y="335">No runtime signal (config, constants)</text>
     </g>
     <text x="720" y="366" font-size="12.5" fill="#8b949e">On Wonderous, a setState listener ranked 🔥 first;</text>
-    <text x="720" y="384" font-size="12.5" fill="#8b949e">the fix cut rebuilds 23% (same flow, 5 runs each).</text>
+    <text x="720" y="384" font-size="12.5" fill="#8b949e">on a real phone the fix cut rebuilds 23%, slow frames 19%.</text>
 
     <!-- Roadmap -->
     <text x="720" y="428" font-size="15" font-weight="600" fill="#58a6ff">Roadmap</text>
     <g font-size="12.5" fill="#c9d1d9">
       <text x="720" y="454"><tspan fill="#3fb950">✓</tspan>  rules · security · CVEs · measure · prioritize</text>
       <text x="720" y="474"><tspan fill="#3fb950">✓</tspan>  flows · Riverpod · on pub.dev (150/160)</text>
-      <text x="720" y="494"><tspan fill="#3fb950">✓</tspan>  perf rules · runtime evidence · --fix · compare</text>
-      <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  HTML report · IDE plugin</text>
+      <text x="720" y="494"><tspan fill="#3fb950">✓</tspan>  --fix · compare · HTML report · real-phone timing</text>
+      <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  IDE plugin</text>
     </g>
     <rect x="720" y="532" width="356" height="10" rx="5" fill="#21262d"/>
-    <rect x="720" y="532" width="305" height="10" rx="5" fill="#3fb950"/>
-    <text x="720" y="562" font-size="12" fill="#8b949e">12 done · 2 to do</text>
+    <rect x="720" y="532" width="331" height="10" rx="5" fill="#3fb950"/>
+    <text x="720" y="562" font-size="12" fill="#8b949e">13 done · 1 to do</text>
 
     <!-- Bottom: language bar -->
     <line x1="20" y1="600" x2="1080" y2="600" stroke="#30363d"/>

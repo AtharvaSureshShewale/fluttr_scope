@@ -1,3 +1,10 @@
+## 0.6.1
+
+- README: the "A real 🔥" section now shows the before/after measured on a
+  real Android phone (debug and profile builds) next to the emulator, and
+  the verification notes say measurements were taken on both. No code
+  changes.
+
 ## 0.6.0
 
 - **`measure --profile`**: frame timings from a profile build, close to
