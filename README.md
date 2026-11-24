@@ -304,27 +304,28 @@ flows, or different devices.
 | `--fail-on-regression` | | Exit 1 if frame timing or total rebuilds got clearly worse (for CI) |
 
 On Wonderous, before and after the `setState`-in-listener fix (same flow,
-3 runs each, Android emulator):
+5 runs each, Android emulator):
 
 ```text
 Metric                        Before       After  Change
-Frames over budget             15.9%       16.4%  no clear change (+3%)
-Slowest frame                81.7 ms     81.4 ms  no clear change (-0%)
-Jank clusters                     19          23  ❌ worse (+21%)
-Rebuilds (after warm-up)      30,095      22,601  ✅ better (-25%)
+Frames over budget             17.2%       19.6%  no clear change (+14%)
+Slowest frame                85.1 ms     57.7 ms  no clear change (-32%)
+Jank clusters                     18          21  no clear change (+17%)
+Rebuilds (after warm-up)      29,385      22,729  ✅ better (-23%)
 
-REBUILDS BY FILE (changed by more than the runs vary)
-  ❌ lib/ui/wonder_illustrations/common/illustration_piece.dart  4,620 -> 7,717  (+67%)
-  ✅ lib/ui/wonder_illustrations/common/wonder_illustration_builder.dart  2,003 -> 96  (-95%)
-  ✅ lib/ui/wonder_illustrations/chichen_itza_illustration.dart  2,050 -> 162  (-92%)
+REBUILDS BY FILE (changed by more than the runs vary, and by 10% or more)
+  ❌ lib/ui/wonder_illustrations/common/illustration_piece.dart  4,490 -> 7,781  (+73%)
+  ✅ lib/ui/wonder_illustrations/common/wonder_illustration_builder.dart  1,943 -> 96  (-95%)
+  ✅ lib/ui/wonder_illustrations/chichen_itza_illustration.dart  2,000 -> 162  (-92%)
   ...
 ```
 
 The fix did what it was meant to: whole illustrations stopped rebuilding
 every frame, and the work moved into the small pieces that actually move.
-It didn't make frames faster on the emulator, and jank clusters rose.
-That may be noise (3 runs a side) or a real cost, so re-measure on a
-physical device before claiming a speedup.
+Frame timing didn't clearly change on the emulator: the slowest frame's
+median fell 32%, but the runs overlap. With 3 runs a side, jank clusters
+had come out "worse"; with 5 they're within noise, which is why `compare`
+suggests re-measuring a surprising 3-run result.
 
 </details>
 

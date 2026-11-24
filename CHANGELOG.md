@@ -7,6 +7,8 @@
   every run before; anything less is "no clear change". Warns when the
   measurements aren't comparable (no flow, different flows or devices).
   `--fail-on-regression` exits 1 when frame timing or rebuilds got worse.
+  Per-file changes under 10% aren't listed (with hundreds of files, some
+  tiny changes line up by chance).
 - `measure --format json` now includes `rebuildsPerRun` and
   `rebuildsByFilePerRun` (steady-state rebuilds in each valid run).
 - **analyzer 11 and 12** are now allowed (`>=10.0.1 <13.0.0`; the full

@@ -8,6 +8,12 @@ library;
 /// with 2 a side, 1 in 3.
 const minRunsToCompare = 3;
 
+/// Files whose rebuild count changed by less than this (percent of the
+/// median) aren't listed, even when the runs don't overlap: with hundreds
+/// of files compared, some tiny changes line up by chance (on Wonderous,
+/// +3% on files the change didn't touch).
+const minFileChangePercent = 10;
+
 enum Change { better, worse, noClearChange, tooFewRuns }
 
 /// One metric measured before and after, one value per valid run.
@@ -258,13 +264,16 @@ String formatComparison(Comparison comparison, {int maxFiles = 10}) {
 
   final changed = comparison.byFile
       .where((m) => m.change == Change.better || m.change == Change.worse)
+      .where((m) => (m.percentChange?.abs() ?? double.infinity) >= minFileChangePercent)
       .toList();
   if (comparison.byFile.isNotEmpty) {
     buffer.writeln();
     if (changed.isEmpty) {
-      buffer.writeln('No file\'s rebuild count changed by more than its runs vary.');
+      buffer.writeln('No file\'s rebuild count changed by more than its runs vary '
+          'and by $minFileChangePercent% or more.');
     } else {
-      buffer.writeln('REBUILDS BY FILE (changed by more than the runs vary)');
+      buffer.writeln('REBUILDS BY FILE (changed by more than the runs vary, '
+          'and by $minFileChangePercent% or more)');
       for (final m in changed.take(maxFiles)) {
         buffer.writeln('  ${m.change == Change.better ? '✅' : '❌'} ${m.name}  '
             '${_number(m.beforeMedian, '')} -> ${_number(m.afterMedian, '')}'

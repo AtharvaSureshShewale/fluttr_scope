@@ -111,6 +111,8 @@ void main() {
     final report = formatComparison(c);
     expect(report, contains('✅ better'));
     expect(report, contains('lib/a.dart  4,611 -> 2,860  (-38%)'));
+    // lib/b.dart's +3% is consistent, but too small to list.
+    expect(report, isNot(contains('lib/b.dart')));
   });
 
   test('shows files outside the project as package: URIs', () {
