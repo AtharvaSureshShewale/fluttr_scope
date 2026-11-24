@@ -15,7 +15,11 @@ import 'package:test/test.dart';
 
 import '../static/test_util.dart';
 
-const _fixableRules = {'missing_const_constructor', 'media_query_of_single_property'};
+const _fixableRules = {
+  'missing_const_constructor',
+  'media_query_of_single_property',
+  'insecure_random_for_secret',
+};
 
 void main() {
   test('applyEdits applies non-overlapping edits by original offsets', () {
@@ -72,7 +76,8 @@ void main() {
           .where((f) => _fixableRules.contains(f.ruleId))
           .map((f) => f.location.file)
           .toSet();
-      expect(left, {'lib/numeric_constraint_examples.dart'});
+      // Left: the skipped file, and the seeded Random(42), which has no fix.
+      expect(left, {'lib/numeric_constraint_examples.dart', 'lib/security_examples.dart'});
 
       final again = await planFixes(root, await engine.analyze(root));
       expect(again.files, isEmpty);

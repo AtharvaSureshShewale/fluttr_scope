@@ -31,12 +31,14 @@ class SecurityExamples extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokenRandom = Random();
+    final tokenSeededRandom = Random(42); // seeded: flagged, but no automatic fix
     return Column(
       children: [
         Text(insecureUrl),
         Text(sensitiveUrlParam),
         Text(serverIp),
         Text('${tokenRandom.nextInt(100)}'),
+        Text('${tokenSeededRandom.nextInt(100)}'),
         TextField(
           decoration: const InputDecoration(labelText: 'Password'),
         ),

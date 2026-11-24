@@ -35,10 +35,33 @@ class InsecureRandomForSecretRule extends StaticRule {
             '`Random.secure()` for anything security-sensitive (tokens, '
             'passwords, OTPs).',
         location: locationOf(unit, node, context),
+        fix: _secureRandomFix(node),
       ));
     }));
     return findings;
   }
+}
+
+/// `Random()` -> `Random.secure()`: the same `dart:math` type and methods,
+/// with unpredictable output from the platform's secure source instead of
+/// guessable output. An unseeded `Random()` is unpredictable to the app
+/// already, so nothing that worked can stop working. A seeded `Random(42)`
+/// gets no fix: the seed means someone wants repeatable numbers, which
+/// `Random.secure()` can't give.
+Fix? _secureRandomFix(InstanceCreationExpression node) {
+  if (node.argumentList.arguments.isNotEmpty) return null;
+  final library = node.constructorName.type.element?.library?.uri.toString();
+  if (library != 'dart:math') return null;
+  final keyword = node.keyword; // `new Random()`
+  return Fix(
+    kind: 'replace',
+    description: 'Use `Random.secure()`',
+    edits: [
+      if (keyword != null && keyword.lexeme == 'new')
+        SourceEdit(offset: keyword.offset, length: node.constructorName.offset - keyword.offset, replacement: ''),
+      SourceEdit(offset: node.constructorName.end, length: 0, replacement: '.secure'),
+    ],
+  );
 }
 
 class _RandomVisitor extends RecursiveAstVisitor<void> {

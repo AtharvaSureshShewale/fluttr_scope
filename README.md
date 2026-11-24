@@ -179,10 +179,11 @@ fluttr_scope analyze [project_dir]
 | `--fix` | | Apply the safe automatic fixes, then report what's left |
 | `--dry-run` | | With `--fix`: show the changes without making them |
 
-**Automatic fixes.** `--fix` fixes two rules whose fix can't change what
-the app does: `missing_const_constructor` (adds `const`) and
+**Automatic fixes.** `--fix` fixes three rules whose fix can't change what
+the app does: `missing_const_constructor` (adds `const`),
 `media_query_of_single_property` (`MediaQuery.of(context).size.width` →
-`MediaQuery.widthOf(context)`). Every changed file is analyzed again first,
+`MediaQuery.widthOf(context)`) and `insecure_random_for_secret`
+(`Random()` → `Random.secure()`; a seeded `Random(42)` is left alone). Every changed file is analyzed again first,
 and left alone if a fix would add a compile error. On Wonderous it fixed
 75 findings in 39 files with `dart analyze`'s output unchanged. Preview
 with `--fix --dry-run`, and commit before fixing so it's easy to review:

@@ -1,3 +1,10 @@
+## 0.6.0 (unreleased)
+
+- **`--fix` for `insecure_random_for_secret`**: `Random()` →
+  `Random.secure()`. Same type and methods, unpredictable output instead
+  of guessable. A seeded `Random(42)` is still flagged but not changed (the
+  seed means repeatable numbers are wanted).
+
 ## 0.5.0
 
 - **`compare before.json after.json`**: did a change make the app faster?

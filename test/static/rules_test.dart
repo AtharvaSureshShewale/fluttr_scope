@@ -484,13 +484,21 @@ void main() {
   test(
       'insecure_random_for_secret flags Random() feeding a '
       'sensitively-named variable', () {
-    final matches = inFile('insecure_random_for_secret', 'security_examples.dart');
-    expect(matches, hasLength(1));
+    final matches = inFile('insecure_random_for_secret', 'security_examples.dart').toList();
+    expect(matches, hasLength(2));
 
     final (line, column) =
         locate('Random();', relativeFile: 'security_examples.dart');
-    expect(matches.single.location.line, line);
-    expect(matches.single.location.column, column);
+    final unseeded = matches.singleWhere((f) => f.location.line == line);
+    expect(unseeded.location.column, column);
+
+    // The fix inserts `.secure` after `Random`; a seeded Random(42) has none.
+    final source = File(p.join(sampleAppRoot, 'lib', 'security_examples.dart')).readAsStringSync();
+    final edit = unseeded.fix!.edits.single;
+    expect(edit.replacement, '.secure');
+    expect(source.substring(edit.offset - 'Random'.length, edit.offset + 2), 'Random()');
+    final (seededLine, _) = locate('Random(42)', relativeFile: 'security_examples.dart');
+    expect(matches.singleWhere((f) => f.location.line == seededLine).fix, isNull);
   });
 
   test(
