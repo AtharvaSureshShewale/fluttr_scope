@@ -117,7 +117,7 @@ String dashboard({required int passed, required int total}) {
   String percent(double fraction) => '${(fraction * 100).round()}';
 
   return '''
-<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640" role="img" aria-label="fluttr_scope project dashboard: $dartRules Dart rules plus $fileChecks file checks, 5 commands, $passed tests passing, CI green on Flutter 3.35.2 and stable; rules by category; findings on Wonderous and Spotube; verification scores; roadmap progress">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640" role="img" aria-label="fluttr_scope project dashboard: $dartRules Dart rules plus $fileChecks file checks, 6 commands, $passed tests passing, CI green on Flutter 3.35.2 and stable; rules by category; findings on Wonderous and Spotube; verification scores; roadmap progress">
   <defs>
     <linearGradient id="logo" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#1f6feb"/>
@@ -157,8 +157,8 @@ String dashboard({required int passed, required int total}) {
     <text x="300" y="44" font-size="17" font-weight="600" fill="#58a6ff">At a glance</text>
     <g font-size="13.5" fill="#c9d1d9">
       <text x="300" y="74">▸  <tspan font-weight="700" fill="#e6edf3">$dartRules</tspan> Dart rules + <tspan font-weight="700" fill="#e6edf3">$fileChecks</tspan> file checks</text>
-      <text x="300" y="98">▸  <tspan font-weight="700" fill="#e6edf3">5</tspan> commands: analyze, security,</text>
-      <text x="322" y="116">measure, prioritize, correlate</text>
+      <text x="300" y="98">▸  <tspan font-weight="700" fill="#e6edf3">6</tspan> commands: analyze, security,</text>
+      <text x="322" y="116">measure, prioritize, correlate, compare</text>
       <text x="300" y="140">▸  <tspan font-weight="700" fill="#e6edf3">$passed</tspan> tests passing</text>
       <text x="510" y="74">▸  <tspan font-weight="700" fill="#e6edf3">8</tspan> real apps audited</text>
       <text x="510" y="98">▸  CI: Flutter 3.35.2 + stable</text>
@@ -241,13 +241,12 @@ ${findingBars()}      <circle cx="384" cy="478" r="5" fill="#f85149"/><text x="3
     <g font-size="12.5" fill="#c9d1d9">
       <text x="720" y="454"><tspan fill="#3fb950">✓</tspan>  rules · security · CVEs · measure · prioritize</text>
       <text x="720" y="474"><tspan fill="#3fb950">✓</tspan>  flows · Riverpod · on pub.dev (150/160)</text>
-      <text x="720" y="494"><tspan fill="#a371f7">●</tspan>  0.3.0: performance rules · runtime evidence</text>
-      <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  PR regression check · HTML report · IDE plugin</text>
+      <text x="720" y="494"><tspan fill="#3fb950">✓</tspan>  perf rules · runtime evidence · --fix · compare</text>
+      <text x="720" y="514"><tspan fill="#8b949e">○</tspan>  HTML report · IDE plugin</text>
     </g>
     <rect x="720" y="532" width="356" height="10" rx="5" fill="#21262d"/>
-    <rect x="720" y="532" width="246" height="10" rx="5" fill="#3fb950"/>
-    <rect x="962" y="532" width="31" height="10" fill="#a371f7"/>
-    <text x="720" y="562" font-size="12" fill="#8b949e">9 done · 1 doing · 3 to do</text>
+    <rect x="720" y="532" width="305" height="10" rx="5" fill="#3fb950"/>
+    <text x="720" y="562" font-size="12" fill="#8b949e">12 done · 2 to do</text>
 
     <!-- Bottom: language bar -->
     <line x1="20" y1="600" x2="1080" y2="600" stroke="#30363d"/>

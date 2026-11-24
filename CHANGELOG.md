@@ -1,3 +1,15 @@
+## 0.5.0
+
+- **`compare before.json after.json`**: did a change make the app faster?
+  Compares two `measure --runs N --format json` results (frames over
+  budget, slowest frame, jank clusters, rebuilds, and rebuilds per file).
+  A metric is better or worse only when every run after beat (or lost to)
+  every run before; anything less is "no clear change". Warns when the
+  measurements aren't comparable (no flow, different flows or devices).
+  `--fail-on-regression` exits 1 when frame timing or rebuilds got worse.
+- `measure --format json` now includes `rebuildsPerRun` and
+  `rebuildsByFilePerRun` (steady-state rebuilds in each valid run).
+
 ## 0.4.0
 
 - **`analyze --fix`**: applies the fixes that can't change what the app

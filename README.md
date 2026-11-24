@@ -277,6 +277,58 @@ to the static performance findings:
 </details>
 
 <details>
+<summary><code>compare</code>: did my change make it faster? Before vs after</summary>
+
+<br>
+
+```sh
+fluttr_scope measure --runs 3 --flow integration_test/my_flow_test.dart --format json --out before.json
+# ...make your change...
+fluttr_scope measure --runs 3 --flow integration_test/my_flow_test.dart --format json --out after.json
+fluttr_scope compare before.json after.json
+```
+
+Compares frames over budget, the slowest frame, jank clusters and
+rebuilds, plus rebuilds per file. A metric is **better** or **worse** only
+when every run after beat (or lost to) every run before. Anything less is
+reported as *no clear change*, because it may just be noise (emulators
+especially). With 3 runs a side, a clean split happens by chance 1 time in
+10; `--runs 5` brings that under 1 in 100 and lets smaller changes show.
+It warns when the two measurements aren't comparable: no flow, different
+flows, or different devices.
+
+| Option | Default | |
+|---|---|---|
+| `--format` | `console` | `console` or `json` |
+| `--out <file>` | stdout | Write the report to a file |
+| `--fail-on-regression` | | Exit 1 if frame timing or total rebuilds got clearly worse (for CI) |
+
+On Wonderous, before and after the `setState`-in-listener fix (same flow,
+3 runs each, Android emulator):
+
+```text
+Metric                        Before       After  Change
+Frames over budget             15.9%       16.4%  no clear change (+3%)
+Slowest frame                81.7 ms     81.4 ms  no clear change (-0%)
+Jank clusters                     19          23  ❌ worse (+21%)
+Rebuilds (after warm-up)      30,095      22,601  ✅ better (-25%)
+
+REBUILDS BY FILE (changed by more than the runs vary)
+  ❌ lib/ui/wonder_illustrations/common/illustration_piece.dart  4,620 -> 7,717  (+67%)
+  ✅ lib/ui/wonder_illustrations/common/wonder_illustration_builder.dart  2,003 -> 96  (-95%)
+  ✅ lib/ui/wonder_illustrations/chichen_itza_illustration.dart  2,050 -> 162  (-92%)
+  ...
+```
+
+The fix did what it was meant to: whole illustrations stopped rebuilding
+every frame, and the work moved into the small pieces that actually move.
+It didn't make frames faster on the emulator, and jank clusters rose.
+That may be noise (3 runs a side) or a real cost, so re-measure on a
+physical device before claiming a speedup.
+
+</details>
+
+<details>
 <summary><code>correlate</code>: attach rebuild counts from a saved capture</summary>
 
 <br>
@@ -312,7 +364,7 @@ Add the two packages it needs:
 dev_dependencies:
   integration_test:
     sdk: flutter
-  fluttr_scope: ^0.4.0
+  fluttr_scope: ^0.5.0
 ```
 
 Then mark where the measured session starts and ends:

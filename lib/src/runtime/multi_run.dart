@@ -75,6 +75,10 @@ class RunAnalysis {
     this.widgetFrameImpacts = const [],
   });
 
+  /// Rebuilds during the steady-state frames (after warm-up), across every
+  /// location.
+  int get steadyStateRebuilds => widgetFrameImpacts.fold(0, (sum, w) => sum + w.rebuildCount);
+
   /// Steady-state slowest frame's total duration in milliseconds. Safe to
   /// assume non-null: a [RunAnalysis] only exists for a run that passed
   /// the [minSteadyStateFramesPerRun] validity check, so [steadyState]
@@ -162,7 +166,24 @@ class MultiRunSummary {
         'dominantBottleneck': dominantBottleneck?.name,
         'environment': environment?.toJson(),
         if (flow != null) 'flow': flow,
+        'rebuildsPerRun': [for (final r in validRuns) r.steadyStateRebuilds],
+        'rebuildsByFilePerRun': rebuildsByFilePerRun(),
       };
+
+  /// Each source file's steady-state rebuild count in each valid run, in
+  /// run order (0 for a run where it didn't rebuild). Per file rather than
+  /// per line so that two measurements stay comparable after an edit moves
+  /// code around (`compare`).
+  Map<String, List<int>> rebuildsByFilePerRun() {
+    final byFile = <String, List<int>>{};
+    for (var i = 0; i < validRuns.length; i++) {
+      for (final impact in validRuns[i].widgetFrameImpacts) {
+        final counts = byFile.putIfAbsent(impact.location.file, () => List.filled(validRuns.length, 0));
+        counts[i] += impact.rebuildCount;
+      }
+    }
+    return byFile;
+  }
 }
 
 Map<String, Object?>? _statsToJson(Stats? stats) {
