@@ -168,7 +168,7 @@ fluttr_scope analyze [project_dir]
 
 | Option | Default | |
 |---|---|---|
-| `--format` | `console` | `console`, `json`, or `sarif` |
+| `--format` | `console` | `console`, `json`, `sarif`, or `html` |
 | `--out <file>` | stdout | Write the report to a file |
 | `--[no-]fatal-warnings` | on | Exit 1 on warnings |
 | `--[no-]fatal-infos` | off | Exit 1 on infos |
@@ -178,6 +178,13 @@ fluttr_scope analyze [project_dir]
 | `--write-baseline` | | Record all current findings as the baseline |
 | `--fix` | | Apply the safe automatic fixes, then report what's left |
 | `--dry-run` | | With `--fix`: show the changes without making them |
+
+**HTML reports.** `--format html --out report.html` (on `analyze`,
+`prioritize` and `compare`) writes one self-contained page to open in a
+browser or attach to an email: findings with the code around them, fix-first
+findings at the top, before/after bars. No scripts, nothing loaded from the
+network, light and dark mode. Secrets in code snippets are cut to their first
+four characters (`'dxqH••••'`), so a shared report doesn't leak them.
 
 **Automatic fixes.** `--fix` fixes three rules whose fix can't change what
 the app does: `missing_const_constructor` (adds `const`),
@@ -300,7 +307,7 @@ flows, or different devices.
 
 | Option | Default | |
 |---|---|---|
-| `--format` | `console` | `console` or `json` |
+| `--format` | `console` | `console`, `json` or `html` |
 | `--out <file>` | stdout | Write the report to a file |
 | `--fail-on-regression` | | Exit 1 if frame timing or total rebuilds got clearly worse (for CI) |
 

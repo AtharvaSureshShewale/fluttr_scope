@@ -1,5 +1,12 @@
 ## 0.6.0 (unreleased)
 
+- **HTML reports**: `--format html` on `analyze`, `prioritize` and
+  `compare` writes one self-contained page (no scripts, no network; light
+  and dark mode; works on a phone): findings with the code around them,
+  fix-first findings on top, before/after bars per file. String values in
+  snippets of secret-related findings are masked (`'dxqH••••'`), since
+  reports are made to be shared.
+
 - **`--fix` for `insecure_random_for_secret`**: `Random()` →
   `Random.secure()`. Same type and methods, unpredictable output instead
   of guessable. A seeded `Random(42)` is still flagged but not changed (the

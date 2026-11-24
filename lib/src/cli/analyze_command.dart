@@ -11,6 +11,7 @@ import '../dependency/osv_client.dart';
 import '../fix/fixer.dart';
 import '../model/finding.dart';
 import '../model/severity.dart';
+import '../report/html_report.dart';
 import '../report/json_report.dart';
 import '../report/sarif_report.dart';
 import '../static/all_rules.dart';
@@ -28,7 +29,7 @@ class AnalyzeCommand extends Command<int> {
     argParser
       ..addOption(
         'format',
-        allowed: ['console', 'json', 'sarif'],
+        allowed: ['console', 'json', 'sarif', 'html'],
         defaultsTo: 'console',
         help: 'Output format.',
       )
@@ -141,6 +142,7 @@ class AnalyzeCommand extends Command<int> {
     final output = switch (argResults!['format']) {
       'json' => toJsonReport(findings, coverage),
       'sarif' => toSarifReport(findings),
+      'html' => htmlFindingsReport(findings, sourceLines: _fileLines(targetArg)),
       _ => _toConsoleReport(findings, coverage),
     };
 
@@ -169,6 +171,15 @@ void _reportFixPlan(FixPlan plan, {required bool dryRun}) {
   for (final skipped in plan.skipped) {
     stderr.writeln('Skipped ${skipped.file} (${skipped.fixCount} fix(es)): ${skipped.reason}.');
   }
+}
+
+/// Reads a root-relative file's lines, once per file.
+SourceLines _fileLines(String root) {
+  final cache = <String, List<String>?>{};
+  return (file) => cache.putIfAbsent(file, () {
+        final f = File(p.join(root, file));
+        return f.existsSync() ? f.readAsLinesSync() : null;
+      });
 }
 
 /// Mirrors `dart analyze`: errors always fail, warnings fail unless

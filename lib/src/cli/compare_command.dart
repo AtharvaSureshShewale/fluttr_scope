@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 
 import '../compare/compare.dart';
+import '../report/html_report.dart';
 
 class CompareCommand extends Command<int> {
   @override
@@ -20,7 +21,7 @@ class CompareCommand extends Command<int> {
     argParser
       ..addOption(
         'format',
-        allowed: ['console', 'json'],
+        allowed: ['console', 'json', 'html'],
         defaultsTo: 'console',
         help: 'Output format.',
       )
@@ -52,6 +53,7 @@ class CompareCommand extends Command<int> {
 
     final output = switch (argResults!['format']) {
       'json' => const JsonEncoder.withIndent('  ').convert(comparison.toJson()),
+      'html' => htmlComparisonReport(comparison),
       _ => formatComparison(comparison),
     };
     final outPath = argResults!['out'] as String?;

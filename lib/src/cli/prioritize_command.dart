@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../dependency/dependency_audit.dart';
 import '../dependency/osv_client.dart';
 import '../model/finding.dart';
+import '../report/html_report.dart';
 import '../runtime/device_detection.dart';
 import '../runtime/multi_run.dart';
 import '../runtime/rebuild_frame_correlation.dart';
@@ -42,7 +43,7 @@ class PrioritizeCommand extends Command<int> {
       )
       ..addOption(
         'format',
-        allowed: ['console', 'json'],
+        allowed: ['console', 'json', 'html'],
         defaultsTo: 'console',
         help: 'Output format.',
       )
@@ -112,15 +113,26 @@ class PrioritizeCommand extends Command<int> {
       [for (final r in summary.validRuns) r.widgetFrameImpacts],
     );
     final linesCache = <String, List<String>?>{};
+    List<String>? sourceLines(String file) => linesCache.putIfAbsent(file, () {
+          final f = File(p.join(root, file));
+          return f.existsSync() ? f.readAsLinesSync() : null;
+        });
     final triaged = triageFindings(
       findings,
       impacts: impacts,
       executedLines: summary.executedLines,
-      sourceLines: (file) => linesCache.putIfAbsent(file, () {
-        final f = File(p.join(root, file));
-        return f.existsSync() ? f.readAsLinesSync() : null;
-      }),
+      sourceLines: sourceLines,
     );
+    final context = TriageContext(
+      device: device,
+      validRuns: summary.validRuns.length,
+      requestedRuns: runs,
+      captureDuration: seconds,
+      warmup: warmup,
+      overallConfidence: summary.overBudgetPercent?.confidence,
+      flow: summary.flow,
+    );
+    final showAll = argResults!['all'] as bool;
 
     final output = switch (argResults!['format']) {
       'json' => const JsonEncoder.withIndent('  ').convert({
@@ -130,19 +142,8 @@ class PrioritizeCommand extends Command<int> {
           if (summary.flow != null) 'flow': summary.flow,
           'findings': [for (final t in triaged) t.toJson()],
         }),
-      _ => formatTriageReport(
-          triaged,
-          TriageContext(
-            device: device,
-            validRuns: summary.validRuns.length,
-            requestedRuns: runs,
-            captureDuration: seconds,
-            warmup: warmup,
-            overallConfidence: summary.overBudgetPercent?.confidence,
-            flow: summary.flow,
-          ),
-          showAll: argResults!['all'] as bool,
-        ),
+      'html' => htmlTriageReport(triaged, context, sourceLines: sourceLines, showAll: showAll),
+      _ => formatTriageReport(triaged, context, showAll: showAll),
     };
 
     final outPath = argResults!['out'] as String?;
